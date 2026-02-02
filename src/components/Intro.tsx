@@ -268,7 +268,7 @@ export const Intro = () => {
             <Orb color={colors[1]} style={{ scale: orb2Scale }} />
             <Orb color={colors[2]} style={{ scale: orb3Scale }} />
           </OrbsContainer>
-          <SmallText style={{ color: 'var(--black)', opacity: 0.3, marginTop: 32, fontSize: 10 }}>
+          <SmallText style={{ color: 'var(--black)', opacity: 0.3, marginTop: 32, fontSize: 10, letterSpacing: '0.15em' }}>
             Signature · House · Vibrant
           </SmallText>
           <KoreanText style={{ color: 'var(--black)', opacity: 0.4, marginTop: 16 }}>
