@@ -244,7 +244,12 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
 
     const orbY = useTransform(scrollYProgress, [0, 1], [50, -50]);
     const contentY = useTransform(scrollYProgress, [0, 1], [30, -30]);
-    const isVibrant = product.id === 'vibrant';
+    const productImages: Record<string, string> = {
+      'decaf': '/decaf-product.png',
+      'house': '/house-product.png',
+      'vibrant': '/vibrant-product.png',
+    };
+    const hasImage = product.id in productImages;
 
     const formatPrice = (price: number) => `₩${price.toLocaleString()}`;
     const indexLabels = ['01 — Morning', '02 — Afternoon', '03 — Evening', '04 — Discovery'];
@@ -276,10 +281,10 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
                   animate={isInView ? { scale: 1 } : {}}
                   transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                 />
-                {isVibrant && (
+                {hasImage && (
                   <FloatingImage
-                    src="/vibrant-product.png"
-                    alt="Vibrant"
+                    src={productImages[product.id]}
+                    alt={product.name}
                     initial={{ scale: 0, opacity: 0 }}
                     animate={isInView ? { scale: 1, opacity: 1 } : {}}
                     transition={{ 
