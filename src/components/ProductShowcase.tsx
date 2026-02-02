@@ -77,13 +77,14 @@ const Ring = styled(motion.div)<{ color: string; size: number }>`
   border-radius: 50%;
 `;
 
-const FloatingImage = styled(motion.img)`
+const FloatingImage = styled(motion.img)<{ padding?: number }>`
   position: absolute;
   width: 400px;
   height: 400px;
   object-fit: contain;
   filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
   z-index: 100;
+  padding: ${({ padding }) => padding || 0}px;
 `;
 
 // Kit용 미니 오브
@@ -285,6 +286,7 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
                   <FloatingImage
                     src={productImages[product.id]}
                     alt={product.name}
+                    padding={product.id === 'decaf' || product.id === 'house' ? 20 : 0}
                     initial={{ scale: 0, opacity: 0 }}
                     animate={isInView ? { scale: 1, opacity: 1 } : {}}
                     transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0.1 }}
