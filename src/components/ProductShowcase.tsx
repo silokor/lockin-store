@@ -79,11 +79,11 @@ const Ring = styled(motion.div)<{ color: string; size: number }>`
 
 const FloatingImage = styled(motion.img)`
   position: absolute;
-  width: clamp(180px, 28vw, 280px);
-  height: auto;
+  width: 200px;
+  height: 200px;
   object-fit: contain;
-  filter: drop-shadow(0 30px 40px rgba(0,0,0,0.4));
-  z-index: 10;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+  z-index: 100;
 `;
 
 // Kit용 미니 오브
@@ -244,8 +244,7 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
 
     const orbY = useTransform(scrollYProgress, [0, 1], [50, -50]);
     const contentY = useTransform(scrollYProgress, [0, 1], [30, -30]);
-    const imageScale = useTransform(scrollYProgress, [0, 0.3, 0.5], [0.5, 0.85, 1]);
-    const imageY = useTransform(scrollYProgress, [0, 0.5], [-20, -60]);
+    const imageScale = useTransform(scrollYProgress, [0, 0.3, 0.5], [0.6, 0.9, 1]);
     const isVibrant = product.id === 'vibrant';
 
     const formatPrice = (price: number) => `₩${price.toLocaleString()}`;
@@ -282,7 +281,7 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
                   <FloatingImage
                     src="/vibrant-product.png"
                     alt="Vibrant"
-                    style={{ scale: imageScale, y: imageY }}
+                    style={{ scale: imageScale }}
                   />
                 )}
               </OrbContainer>
