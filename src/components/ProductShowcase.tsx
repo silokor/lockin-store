@@ -79,8 +79,8 @@ const Ring = styled(motion.div)<{ color: string; size: number }>`
 
 const FloatingImage = styled(motion.img)`
   position: absolute;
-  width: 600px;
-  height: 600px;
+  width: 400px;
+  height: 400px;
   object-fit: contain;
   filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
   z-index: 100;
@@ -282,7 +282,12 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
                     alt="Vibrant"
                     initial={{ scale: 0, opacity: 0 }}
                     animate={isInView ? { scale: 1, opacity: 1 } : {}}
-                    transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ 
+                      type: 'spring', 
+                      stiffness: 200, 
+                      damping: 15,
+                      delay: 0.3 
+                    }}
                   />
                 )}
               </OrbContainer>
