@@ -198,10 +198,9 @@ const PriceRow = styled(motion.div)`
 `;
 
 const Price = styled.span`
-  font-family: 'Space Mono', monospace;
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: 'EB Garamond', serif;
+  font-size: 32px;
+  font-style: italic;
 `;
 
 const Badge = styled.span<{ color: string }>`
