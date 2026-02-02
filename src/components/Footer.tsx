@@ -4,8 +4,8 @@ import { useRef } from 'react';
 
 const Section = styled.footer`
   padding: 160px 24px 80px;
-  background: var(--white);
-  color: var(--black);
+  background: var(--black);
+  color: var(--white);
 `;
 
 const Container = styled.div`
@@ -57,7 +57,7 @@ const Link = styled(motion.a)`
   opacity: 0.4;
   transition: opacity 0.3s ease;
   text-decoration: none;
-  color: var(--black);
+  color: var(--white);
 
   &:hover {
     opacity: 1;
@@ -67,7 +67,7 @@ const Link = styled(motion.a)`
 const Divider = styled(motion.div)`
   width: 60px;
   height: 1px;
-  background: rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.2);
   margin: 0 auto 40px;
 `;
 
