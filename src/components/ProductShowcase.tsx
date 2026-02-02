@@ -79,8 +79,8 @@ const Ring = styled(motion.div)<{ color: string; size: number }>`
 
 const FloatingImage = styled(motion.img)`
   position: absolute;
-  width: 200px;
-  height: 200px;
+  width: 600px;
+  height: 600px;
   object-fit: contain;
   filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
   z-index: 100;
