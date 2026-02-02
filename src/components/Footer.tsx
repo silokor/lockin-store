@@ -4,8 +4,8 @@ import { useRef } from 'react';
 
 const Section = styled.footer`
   padding: 160px 24px 80px;
-  background: var(--black);
-  color: var(--white);
+  background: var(--white);
+  color: var(--black);
 `;
 
 const Container = styled.div`
@@ -30,25 +30,34 @@ const Tagline = styled(motion.p)`
   margin-bottom: 80px;
 `;
 
-const Links = styled(motion.div)`
+const LinksSection = styled(motion.div)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 80px;
+`;
+
+const LinkGroup = styled.div`
   display: flex;
   justify-content: center;
   gap: 48px;
-  margin-bottom: 80px;
+  flex-wrap: wrap;
 
   @media (max-width: 640px) {
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
   }
 `;
 
 const Link = styled(motion.a)`
   font-family: 'Space Mono', monospace;
   font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  letter-spacing: 0.15em;
   opacity: 0.4;
   transition: opacity 0.3s ease;
+  text-decoration: none;
+  color: var(--black);
 
   &:hover {
     opacity: 1;
@@ -58,7 +67,7 @@ const Link = styled(motion.a)`
 const Divider = styled(motion.div)`
   width: 60px;
   height: 1px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.15);
   margin: 0 auto 40px;
 `;
 
@@ -103,16 +112,28 @@ export const Footer = () => {
           The focus you deserve.
         </Tagline>
 
-        <Links
+        <LinksSection
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          <Link href="#">Story</Link>
-          <Link href="#">Science</Link>
-          <Link href="#">Shop</Link>
-          <Link href="#">Contact</Link>
-        </Links>
+          <LinkGroup>
+            <Link href="https://instagram.com/thezonebio" target="_blank" rel="noopener noreferrer">
+              @thezonebio
+            </Link>
+            <Link href="https://instagram.com/thezonebio.kr" target="_blank" rel="noopener noreferrer">
+              @thezonebio.kr
+            </Link>
+          </LinkGroup>
+          <LinkGroup>
+            <Link href="https://smartstore.naver.com/thezonebio" target="_blank" rel="noopener noreferrer">
+              Naver Smartstore
+            </Link>
+            <Link href="mailto:contact@thezonebio.com">
+              contact@thezonebio.com
+            </Link>
+          </LinkGroup>
+        </LinksSection>
 
         <Divider
           initial={{ scaleX: 0 }}

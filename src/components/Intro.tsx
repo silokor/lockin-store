@@ -45,6 +45,18 @@ const BigTitle = styled(motion.h1)`
   color: var(--black);
 `;
 
+// 인트로 3줄 구조
+const IntroLine = styled(motion.p)<{ isMain?: boolean }>`
+  font-family: ${({ isMain }) => isMain ? "'EB Garamond', serif" : "'Space Mono', monospace"};
+  font-size: ${({ isMain }) => isMain ? 'clamp(48px, 12vw, 160px)' : 'clamp(18px, 3vw, 32px)'};
+  font-style: ${({ isMain }) => isMain ? 'italic' : 'normal'};
+  font-weight: 400;
+  text-align: center;
+  color: var(--black);
+  letter-spacing: ${({ isMain }) => isMain ? 'normal' : '0.1em'};
+  text-transform: ${({ isMain }) => isMain ? 'none' : 'uppercase'};
+`;
+
 const SmallText = styled(motion.p)`
   font-family: 'Space Mono', monospace;
   font-size: 11px;
@@ -209,13 +221,24 @@ export const Intro = () => {
         <Background style={{ backgroundColor: 'var(--black)', opacity: bgOpacity }} />
 
         {/* Phase 1: Lock In */}
-        <Phase style={{ opacity: phase1Opacity }}>
-          <SmallText style={{ opacity: 0.4, marginBottom: 32 }}>
-            Functional Mushroom Coffee
-          </SmallText>
-          <BigTitle style={{ scale: phase1Scale, y: phase1Y }}>
-            Lock In
-          </BigTitle>
+        <Phase style={{ opacity: phase1Opacity, scale: phase1Scale, y: phase1Y }}>
+          <IntroLine style={{ marginBottom: 8 }}>
+            You need
+          </IntroLine>
+          <IntroLine 
+            isMain 
+            style={{ 
+              marginBottom: 8,
+            }}
+          >
+            Lock In Coffee
+          </IntroLine>
+          <IntroLine>
+            .
+          </IntroLine>
+          <KoreanText style={{ color: 'var(--black)', opacity: 0.4, marginTop: 40 }}>
+            뇌가 원하는 연료
+          </KoreanText>
         </Phase>
 
         {/* Phase 2: 서브카피 */}
@@ -281,6 +304,9 @@ export const Intro = () => {
             <br />
             who refuse to compromise.
           </MediumText>
+          <KoreanText style={{ color: 'var(--black)', opacity: 0.5, marginTop: 24 }}>
+            타협하지 않는 사람들을 위해 설계되었다.
+          </KoreanText>
           <HorizontalLine style={{ opacity: 0.2 }} />
           <SmallText style={{ color: 'var(--black)', opacity: 0.3, marginTop: 20 }}>
             The Zone Bio · Seoul
