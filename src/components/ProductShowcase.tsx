@@ -224,7 +224,7 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
   ({ product, index }, ref) => {
     const containerRef = useRef(null);
     const isInView = useInView(containerRef, { amount: 0.4 });
-    const isDark = index % 2 !== 0;
+    const isDark = index % 2 !== 0 && product.id !== 'house';
     const isEven = index % 2 === 1;
     const isKit = product.isKit;
 
