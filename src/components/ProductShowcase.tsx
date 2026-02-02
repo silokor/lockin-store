@@ -137,6 +137,15 @@ const Description = styled(motion.p)`
   line-height: 1.7;
   opacity: 0.7;
   max-width: 400px;
+  margin-bottom: 16px;
+`;
+
+const DescriptionKr = styled(motion.p)`
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  opacity: 0.5;
+  max-width: 400px;
   margin-bottom: 32px;
 `;
 
@@ -294,6 +303,14 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
             >
               {product.description}
             </Description>
+
+            <DescriptionKr
+              initial={{ opacity: 0, y: 15 }}
+              animate={isInView ? { opacity: 0.5, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: 0.35 }}
+            >
+              {product.descriptionKr}
+            </DescriptionKr>
 
             {isKit && product.includes ? (
               <Includes
