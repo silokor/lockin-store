@@ -158,6 +158,11 @@ export const Receipt = ({ items, onRemove }: Props) => {
     setIsVisible(false);
     lastScrollY.current = window.scrollY;
 
+    const isAtBottom = () => {
+      const threshold = 50; // px from bottom
+      return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - threshold;
+    };
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
@@ -168,6 +173,14 @@ export const Receipt = ({ items, onRemove }: Props) => {
       }
       
       lastScrollY.current = currentScrollY;
+      
+      // Show immediately if at bottom
+      if (isAtBottom()) {
+        clearTimeout(scrollTimeout.current);
+        setIsVisible(true);
+        return;
+      }
+      
       setIsVisible(false);
       clearTimeout(scrollTimeout.current);
 
