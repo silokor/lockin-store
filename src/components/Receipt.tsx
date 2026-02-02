@@ -19,17 +19,18 @@ const Wrapper = styled(motion.div)`
 `;
 
 const ReceiptPaper = styled(motion.div)`
-  background: var(--black);
-  color: var(--white);
+  background: #ffffff;
+  color: var(--black);
   font-family: 'Space Mono', monospace;
   padding: 28px 24px;
   position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
 `;
 
 const Header = styled.div`
   text-align: center;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
   margin-bottom: 20px;
 `;
 
@@ -50,7 +51,7 @@ const Item = styled(motion.div)`
   justify-content: space-between;
   align-items: flex-start;
   padding: 14px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
   
   &:last-of-type {
     border-bottom: none;
@@ -82,13 +83,13 @@ const ItemPrice = styled.span`
 
 const RemoveBtn = styled(motion.button)`
   font-size: 16px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(0,0,0,0.3);
   margin-left: 12px;
   line-height: 1;
 `;
 
 const Divider = styled.div`
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
   margin: 16px 0;
 `;
 
@@ -114,8 +115,8 @@ const TotalAmount = styled(motion.span)`
 const CheckoutBtn = styled(motion.button)`
   width: 100%;
   padding: 14px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
+  background: var(--black);
+  border: none;
   color: var(--white);
   font-family: 'Space Mono', monospace;
   font-size: 9px;
@@ -124,8 +125,7 @@ const CheckoutBtn = styled(motion.button)`
   transition: all 0.3s ease;
 
   &:hover {
-    background: var(--white);
-    color: var(--black);
+    background: #333;
   }
 `;
 
@@ -194,10 +194,10 @@ export const Receipt = ({ items, onRemove }: Props) => {
     <AnimatePresence>
       {shouldShow && (
         <Wrapper
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          initial={{ x: '120%', rotate: 3 }}
+          animate={{ x: 0, rotate: 1 }}
+          exit={{ x: '120%', rotate: 5 }}
+          transition={{ type: 'spring', stiffness: 80, damping: 15 }}
         >
           <ReceiptPaper>
             <Header>
