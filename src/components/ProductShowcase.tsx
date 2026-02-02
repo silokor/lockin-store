@@ -279,20 +279,15 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
                   size={200}
                   initial={{ scale: 0 }}
                   animate={isInView ? { scale: 1 } : {}}
-                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
                 />
                 {hasImage && (
                   <FloatingImage
                     src={productImages[product.id]}
                     alt={product.name}
-                    initial={{ scale: 0, opacity: 0 }}
+                    initial={{ scale: 0.9, opacity: 0 }}
                     animate={isInView ? { scale: 1, opacity: 1 } : {}}
-                    transition={{ 
-                      type: 'spring', 
-                      stiffness: 200, 
-                      damping: 15,
-                      delay: 0.3 
-                    }}
+                    transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
                   />
                 )}
               </OrbContainer>
