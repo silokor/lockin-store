@@ -244,7 +244,6 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
 
     const orbY = useTransform(scrollYProgress, [0, 1], [50, -50]);
     const contentY = useTransform(scrollYProgress, [0, 1], [30, -30]);
-    const imageScale = useTransform(scrollYProgress, [0, 0.3, 0.5], [0.6, 0.9, 1]);
     const isVibrant = product.id === 'vibrant';
 
     const formatPrice = (price: number) => `₩${price.toLocaleString()}`;
@@ -281,7 +280,9 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
                   <FloatingImage
                     src="/vibrant-product.png"
                     alt="Vibrant"
-                    style={{ scale: imageScale }}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={isInView ? { scale: 1, opacity: 1 } : {}}
+                    transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   />
                 )}
               </OrbContainer>
