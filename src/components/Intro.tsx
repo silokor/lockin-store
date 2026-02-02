@@ -63,6 +63,7 @@ const SmallText = styled(motion.p)`
   letter-spacing: 0.4em;
   text-transform: uppercase;
   text-align: center;
+  width: 100%;
 `;
 
 const MediumText = styled(motion.p)`
@@ -88,6 +89,7 @@ const OrbsContainer = styled(motion.div)`
   align-items: center;
   gap: 32px;
   margin-top: 60px;
+  width: 100%;
 `;
 
 const Orb = styled(motion.div)<{ color: string }>`
