@@ -84,6 +84,8 @@ const KoreanText = styled(motion.p)`
 // 제품 오브들
 const OrbsContainer = styled(motion.div)`
   display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 32px;
   margin-top: 60px;
 `;
