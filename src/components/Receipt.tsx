@@ -77,8 +77,9 @@ const ItemSub = styled.span`
 `;
 
 const ItemPrice = styled.span`
-  font-size: 12px;
-  opacity: 0.8;
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  font-style: italic;
 `;
 
 const RemoveBtn = styled(motion.button)`

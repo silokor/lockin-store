@@ -250,7 +250,7 @@ export const Intro = () => {
           </MediumText>
           <HorizontalLine style={{ opacity: 0.2 }} />
           <KoreanText style={{ color: 'var(--black)', opacity: 0.5 }}>
-            식곤증은 잡고, 잠은 건드리지 않는다
+            필요한 집중력은 드리고, 불필요한 크래시는 드리지 않습니다
           </KoreanText>
         </Phase>
 
@@ -267,6 +267,9 @@ export const Intro = () => {
           <SmallText style={{ color: 'var(--black)', opacity: 0.3, marginTop: 32, fontSize: 10 }}>
             Signature · House · Vibrant
           </SmallText>
+          <KoreanText style={{ color: 'var(--black)', opacity: 0.4, marginTop: 16 }}>
+            세 가지 블렌드, 하나의 루틴이 됩니다
+          </KoreanText>
         </Phase>
 
         {/* Phase 4: 성분 */}
@@ -292,6 +295,9 @@ export const Intro = () => {
               <IngredientKr>{ingredients[3].kr}</IngredientKr>
             </IngredientItem>
           </IngredientsList>
+          <KoreanText style={{ color: 'var(--black)', opacity: 0.4, marginTop: 32 }}>
+            자연에서 온 집중력입니다
+          </KoreanText>
         </Phase>
 
         {/* Phase 5: 파이널 */}
@@ -305,7 +311,7 @@ export const Intro = () => {
             who refuse to compromise.
           </MediumText>
           <KoreanText style={{ color: 'var(--black)', opacity: 0.5, marginTop: 24 }}>
-            타협하지 않는 사람들을 위해 설계되었다.
+            타협하지 않는 분들을 위해 설계했습니다
           </KoreanText>
           <HorizontalLine style={{ opacity: 0.2 }} />
           <SmallText style={{ color: 'var(--black)', opacity: 0.3, marginTop: 20 }}>
