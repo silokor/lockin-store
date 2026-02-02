@@ -83,13 +83,18 @@ const KoreanText = styled(motion.p)`
 `;
 
 // 제품 오브들
+const OrbsSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
 const OrbsContainer = styled(motion.div)`
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 32px;
   margin-top: 60px;
-  width: 100%;
 `;
 
 const Orb = styled(motion.div)<{ color: string }>`
@@ -263,14 +268,16 @@ export const Intro = () => {
           <SmallText style={{ color: 'var(--black)', opacity: 0.4, marginBottom: 20 }}>
             Three Blends, One Ritual
           </SmallText>
-          <OrbsContainer>
-            <Orb color={colors[0]} style={{ scale: orb1Scale }} />
-            <Orb color={colors[1]} style={{ scale: orb2Scale }} />
-            <Orb color={colors[2]} style={{ scale: orb3Scale }} />
-          </OrbsContainer>
-          <SmallText style={{ color: 'var(--black)', opacity: 0.3, marginTop: 32, fontSize: 10, letterSpacing: '0.15em' }}>
-            Signature · House · Vibrant
-          </SmallText>
+          <OrbsSection>
+            <OrbsContainer>
+              <Orb color={colors[0]} style={{ scale: orb1Scale }} />
+              <Orb color={colors[1]} style={{ scale: orb2Scale }} />
+              <Orb color={colors[2]} style={{ scale: orb3Scale }} />
+            </OrbsContainer>
+            <SmallText style={{ color: 'var(--black)', opacity: 0.3, marginTop: 32, fontSize: 10, letterSpacing: '0.15em' }}>
+              Signature · House · Vibrant
+            </SmallText>
+          </OrbsSection>
           <KoreanText style={{ color: 'var(--black)', opacity: 0.4, marginTop: 16 }}>
             세 가지 블렌드, 하나의 루틴이 됩니다
           </KoreanText>
