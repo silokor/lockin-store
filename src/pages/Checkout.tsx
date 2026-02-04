@@ -19,6 +19,16 @@ declare global {
         }) => void;
       }) => { open: () => void };
     };
+    TossPayments: (clientKey: string) => {
+      requestPayment: (method: string, options: {
+        amount: number;
+        orderId: string;
+        orderName: string;
+        customerName: string;
+        successUrl: string;
+        failUrl: string;
+      }) => Promise<void>;
+    };
   }
 }
 
@@ -560,14 +570,35 @@ export const Checkout = () => {
   };
 
   const handlePaymentSubmit = async () => {
-    if (!isPaymentValid) return;
-    
     setIsProcessing(true);
-    // 실제 결제 처리 시뮬레이션
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    try {
+      // 토스페이먼츠 테스트 클라이언트 키
+      const clientKey = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
+      const tossPayments = window.TossPayments(clientKey);
+      
+      // 주문 ID 생성 (고유해야 함)
+      const orderId = `LOCKIN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // 주문명 생성
+      const orderName = items.length === 1 
+        ? items[0].name 
+        : `${items[0].name} 외 ${items.length - 1}건`;
+      
+      await tossPayments.requestPayment('카드', {
+        amount: grandTotal,
+        orderId: orderId,
+        orderName: orderName,
+        customerName: shipping.name,
+        successUrl: `${window.location.origin}/checkout?success=true`,
+        failUrl: `${window.location.origin}/checkout?fail=true`,
+      });
+    } catch (error) {
+      // 사용자가 결제창을 닫은 경우
+      console.log('결제 취소:', error);
+    }
+    
     setIsProcessing(false);
-    setShowSuccess(true);
-    clearCart();
   };
 
   if (items.length === 0 && !showSuccess) {
@@ -734,49 +765,31 @@ export const Checkout = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
               >
-                <FormGroup>
-                  <Label>Card Number *</Label>
-                  <Input
-                    type="text"
-                    placeholder="0000 0000 0000 0000"
-                    value={payment.cardNumber}
-                    onChange={(e) => setPayment({ ...payment, cardNumber: e.target.value })}
-                    maxLength={19}
-                  />
-                </FormGroup>
-
-                <FormRow>
-                  <FormGroup>
-                    <Label>Expiry Date *</Label>
-                    <Input
-                      type="text"
-                      placeholder="MM/YY"
-                      value={payment.cardExpiry}
-                      onChange={(e) => setPayment({ ...payment, cardExpiry: e.target.value })}
-                      maxLength={5}
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>CVC *</Label>
-                    <Input
-                      type="text"
-                      placeholder="123"
-                      value={payment.cardCvc}
-                      onChange={(e) => setPayment({ ...payment, cardCvc: e.target.value })}
-                      maxLength={4}
-                    />
-                  </FormGroup>
-                </FormRow>
-
-                <FormGroup>
-                  <Label>Card Holder Name *</Label>
-                  <Input
-                    type="text"
-                    placeholder="HONG GILDONG"
-                    value={payment.cardName}
-                    onChange={(e) => setPayment({ ...payment, cardName: e.target.value.toUpperCase() })}
-                  />
-                </FormGroup>
+                <div style={{ 
+                  padding: '32px', 
+                  background: 'white', 
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  marginBottom: 24,
+                  textAlign: 'center'
+                }}>
+                  <div style={{ 
+                    fontFamily: 'EB Garamond', 
+                    fontSize: 24, 
+                    fontStyle: 'italic',
+                    marginBottom: 12 
+                  }}>
+                    토스페이먼츠 결제
+                  </div>
+                  <div style={{ 
+                    fontFamily: 'Space Mono', 
+                    fontSize: 11, 
+                    opacity: 0.5,
+                    lineHeight: 1.8
+                  }}>
+                    아래 버튼을 클릭하면<br />
+                    토스페이먼츠 결제창이 열립니다
+                  </div>
+                </div>
 
                 <Divider />
 
@@ -810,11 +823,11 @@ export const Checkout = () => {
 
                 <SubmitButton
                   onClick={handlePaymentSubmit}
-                  disabled={!isPaymentValid || isProcessing}
-                  whileHover={{ scale: isPaymentValid && !isProcessing ? 1.01 : 1 }}
-                  whileTap={{ scale: isPaymentValid && !isProcessing ? 0.99 : 1 }}
+                  disabled={isProcessing}
+                  whileHover={{ scale: !isProcessing ? 1.01 : 1 }}
+                  whileTap={{ scale: !isProcessing ? 0.99 : 1 }}
                 >
-                  {isProcessing ? 'PROCESSING...' : `PAY ${formatPrice(grandTotal)}`}
+                  {isProcessing ? 'PROCESSING...' : `토스로 ${formatPrice(grandTotal)} 결제하기`}
                 </SubmitButton>
               </motion.div>
             )}
