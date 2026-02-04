@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Global } from '@emotion/react';
 import { globalStyles } from '../styles/global';
 import { Intro } from '../components/Intro';
@@ -9,7 +10,8 @@ import { CartReceipt } from '../components/CartReceipt';
 import { products } from '../data/products';
 import { useCart } from '../context/CartContext';
 
-export const Home = () => {
+export const Home = ({ scrollToShop = false }: { scrollToShop?: boolean }) => {
+  const location = useLocation();
   const { addToCart, items } = useCart();
   const [viewedProducts, setViewedProducts] = useState<Set<string>>(new Set());
   const productRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -49,6 +51,18 @@ export const Home = () => {
 
     return () => observer.disconnect();
   }, [handleIntersect]);
+
+  // /shop 또는 #shop으로 접근 시 상품 섹션으로 스크롤
+  useEffect(() => {
+    if (scrollToShop || location.hash === '#shop') {
+      setTimeout(() => {
+        const section = document.getElementById('products-section');
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [scrollToShop, location.hash]);
 
   return (
     <>
