@@ -1,4 +1,5 @@
 import { forwardRef, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import type { Product } from '../data/products';
@@ -35,6 +36,7 @@ const Visual = styled(motion.div)<{ isEven: boolean }>`
   align-items: center;
   justify-content: center;
   order: ${({ isEven }) => isEven ? 2 : 1};
+  cursor: pointer;
 
   @media (max-width: 968px) {
     order: 1;
@@ -55,6 +57,7 @@ const Orb = styled(motion.div)<{ color: string; size: number }>`
   background: ${({ color }) => color};
   position: relative;
   box-shadow: 0 40px 80px ${({ color }) => color}30;
+  transition: transform 0.5s ease;
   
   &::before {
     content: '';
@@ -85,6 +88,7 @@ const FloatingImage = styled(motion.img)<{ padding?: number }>`
   filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
   z-index: 100;
   padding: ${({ padding }) => padding || 0}px;
+  transition: transform 0.5s ease;
 `;
 
 // Kit용 미니 오브
@@ -99,6 +103,7 @@ const MiniOrb = styled(motion.div)<{ color: string }>`
   border-radius: 50%;
   background: ${({ color }) => color};
   box-shadow: 0 20px 40px ${({ color }) => color}30;
+  transition: transform 0.3s ease;
 
   @media (max-width: 768px) {
     width: 60px;
@@ -172,16 +177,19 @@ const NotesLabel = styled.span`
 const Notes = styled(motion.div)`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 40px;
 `;
 
 const Note = styled(motion.span)<{ isDark: boolean }>`
-  font-family: 'EB Garamond', serif;
-  font-size: 14px;
-  font-style: italic;
-  padding: 8px 16px;
-  border: 1px solid ${({ isDark }) => isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'};
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  opacity: 0.6;
+  
+  &::before {
+    content: '#';
+    opacity: 0.5;
+  }
 `;
 
 // Kit 구성품
@@ -203,8 +211,40 @@ const IncludeItem = styled.span<{ isDark: boolean }>`
 
 const PriceRow = styled(motion.div)`
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 24px;
+`;
+
+const OriginalPrice = styled.span`
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  text-decoration: line-through;
+  opacity: 0.35;
+`;
+
+const DiscountBadge = styled.span`
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ED6427;
+`;
+
+const ViewButton = styled(motion.button)<{ isDark: boolean }>`
+  padding: 12px 24px;
+  background: transparent;
+  border: 1px solid ${({ isDark }) => isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+  color: inherit;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    background: ${({ isDark }) => isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
+  }
 `;
 
 const Price = styled.span`
@@ -228,10 +268,12 @@ const kitColors = ['#A71B1B', '#37385A', '#ED6427'];
 interface Props {
   product: Product;
   index: number;
+  isViewed?: boolean;
 }
 
 export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
-  ({ product, index }, ref) => {
+  ({ product, index, isViewed }, ref) => {
+    const navigate = useNavigate();
     const containerRef = useRef(null);
     const isInView = useInView(containerRef, { amount: 0.4 });
     const isDark = index % 2 !== 0 && product.id !== 'house';
@@ -255,10 +297,14 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
     const formatPrice = (price: number) => `₩${price.toLocaleString()}`;
     const indexLabels = ['01 — Morning', '02 — Afternoon', '03 — Evening', '04 — Discovery'];
 
+    const handleViewDetails = () => {
+      navigate(`/product/${product.id}`);
+    };
+
     return (
       <Section ref={ref} data-product-id={product.id} isDark={isDark}>
         <Container ref={containerRef}>
-          <Visual isEven={isEven}>
+          <Visual isEven={isEven} onClick={handleViewDetails}>
             {isKit ? (
               <KitOrbs style={{ y: orbY }}>
                 {kitColors.map((color, i) => (
@@ -267,7 +313,8 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
                     color={color}
                     initial={{ scale: 0, y: 30 }}
                     animate={isInView ? { scale: 1, y: 0 } : {}}
-                    transition={{ duration: 0.8, delay: 0.2 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.4, delay: 0.1 + i * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
+                    whileHover={{ scale: 1.1 }}
                   />
                 ))}
               </KitOrbs>
@@ -280,7 +327,8 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
                   size={200}
                   initial={{ scale: 0 }}
                   animate={isInView ? { scale: 1 } : {}}
-                  transition={{ type: 'spring', stiffness: 150, damping: 20 }}
+                  transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                  whileHover={{ scale: 1.05 }}
                 />
                 {hasImage && (
                   <FloatingImage
@@ -289,7 +337,8 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
                     padding={product.id === 'decaf' || product.id === 'house' ? 20 : 0}
                     initial={{ scale: 0, opacity: 0 }}
                     animate={isInView ? { scale: 1, opacity: 1 } : {}}
-                    transition={{ type: 'spring', stiffness: 150, damping: 20, delay: 0.1 }}
+                    transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
+                    whileHover={{ scale: 1.05 }}
                   />
                 )}
               </OrbContainer>
@@ -300,7 +349,7 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
             <Index
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 0.3 } : {}}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.35 }}
             >
               {indexLabels[index]}
             </Index>
@@ -308,7 +357,7 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
             <ProductName
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.1 }}
+              transition={{ duration: 0.45, delay: 0.05 }}
             >
               {product.name}
             </ProductName>
@@ -316,15 +365,26 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
             <ProductNameKr
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 0.5 } : {}}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.35, delay: 0.1 }}
             >
               {product.nameKr}
             </ProductNameKr>
 
+            {product.badge && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={isInView ? { opacity: 1 } : {}}
+                transition={{ duration: 0.3, delay: 0.12 }}
+                style={{ marginBottom: 20 }}
+              >
+                <Badge color={product.color}>{product.badge}</Badge>
+              </motion.div>
+            )}
+
             <Description
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 0.7, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              transition={{ duration: 0.4, delay: 0.15 }}
             >
               {product.description}
             </Description>
@@ -332,7 +392,7 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
             <DescriptionKr
               initial={{ opacity: 0, y: 15 }}
               animate={isInView ? { opacity: 0.5, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.35 }}
+              transition={{ duration: 0.4, delay: 0.18 }}
             >
               {product.descriptionKr}
             </DescriptionKr>
@@ -341,7 +401,7 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
               <Includes
                 initial={{ opacity: 0 }}
                 animate={isInView ? { opacity: 1 } : {}}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
               >
                 <NotesLabel>Package Includes</NotesLabel>
                 {product.includes.map((item) => (
@@ -352,33 +412,49 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
               <Notes
                 initial={{ opacity: 0 }}
                 animate={isInView ? { opacity: 1 } : {}}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
               >
-                <NotesLabel>Tasting Notes</NotesLabel>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                  {product.tastingNotes.map((note, i) => (
-                    <Note
-                      key={note}
-                      isDark={isDark}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={isInView ? { opacity: 1, y: 0 } : {}}
-                      transition={{ duration: 0.4, delay: 0.5 + i * 0.05 }}
-                    >
-                      {note}
-                    </Note>
-                  ))}
-                </div>
+                {product.tastingNotes.map((note, i) => (
+                  <Note
+                    key={note}
+                    isDark={isDark}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.25, delay: 0.25 + i * 0.03 }}
+                  >
+                    {note}
+                  </Note>
+                ))}
               </Notes>
             )}
 
             <PriceRow
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.5 }}
+              transition={{ duration: 0.35, delay: 0.25 }}
             >
+              {product.originalPrice && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <OriginalPrice>{formatPrice(product.originalPrice)}</OriginalPrice>
+                  <DiscountBadge>
+                    {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
+                  </DiscountBadge>
+                </div>
+              )}
               <Price>{formatPrice(product.price)}</Price>
-              {product.badge && <Badge color={product.color}>{product.badge}</Badge>}
             </PriceRow>
+
+            <ViewButton
+              isDark={isDark}
+              onClick={handleViewDetails}
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.3, delay: 0.28 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              VIEW DETAILS
+            </ViewButton>
           </Content>
         </Container>
       </Section>

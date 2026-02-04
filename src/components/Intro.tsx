@@ -24,7 +24,7 @@ const Background = styled(motion.div)`
 `;
 
 // 페이즈 컨테이너들
-const Phase = styled(motion.div)`
+const Phase = styled(motion.div)<{ active?: boolean }>`
   position: absolute;
   inset: 0;
   display: flex;
@@ -32,6 +32,7 @@ const Phase = styled(motion.div)`
   align-items: center;
   justify-content: center;
   padding: 0 24px;
+  pointer-events: none;
 `;
 
 // 타이틀
@@ -80,6 +81,34 @@ const KoreanText = styled(motion.p)`
   font-size: clamp(14px, 2vw, 18px);
   letter-spacing: 0.05em;
   text-align: center;
+`;
+
+const KoreanTextLarge = styled(motion.p)`
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(16px, 3vw, 28px);
+  letter-spacing: 0.1em;
+  text-align: center;
+  font-weight: 400;
+`;
+
+const ShopButton = styled(motion.button)`
+  margin-top: 32px;
+  padding: 12px 28px;
+  background: var(--black);
+  border: none;
+  color: var(--white);
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.3s;
+  pointer-events: auto;
+
+  &:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  }
 `;
 
 // 제품 오브들
@@ -242,12 +271,21 @@ export const Intro = () => {
           >
             Lock In Coffee
           </IntroLine>
-          <IntroLine>
-            .
-          </IntroLine>
-          <KoreanText style={{ color: 'var(--black)', opacity: 0.4, marginTop: 40 }}>
+          <KoreanTextLarge style={{ color: 'var(--black)', opacity: 0.6, marginTop: 32 }}>
             뇌가 원하는 연료
-          </KoreanText>
+          </KoreanTextLarge>
+          <ShopButton
+            onClick={() => {
+              const section = document.getElementById('products-section');
+              if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            GO TO SHOP
+          </ShopButton>
         </Phase>
 
         {/* Phase 2: 서브카피 */}
