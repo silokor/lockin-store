@@ -178,7 +178,7 @@ const Notes = styled(motion.div)`
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 `;
 
 const Note = styled(motion.span)<{ isDark: boolean }>`
@@ -194,7 +194,7 @@ const Note = styled(motion.span)<{ isDark: boolean }>`
 
 // Kit 구성품
 const Includes = styled(motion.div)`
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 `;
 
 const IncludeItem = styled.span<{ isDark: boolean }>`
@@ -209,48 +209,45 @@ const IncludeItem = styled.span<{ isDark: boolean }>`
   }
 `;
 
-const PriceRow = styled(motion.div)`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  margin-bottom: 24px;
+const ComingSoonBadge = styled(motion.div)<{ isDark: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+  margin-bottom: 16px;
 `;
 
-const OriginalPrice = styled.span`
-  font-family: 'Space Mono', monospace;
-  font-size: 14px;
-  text-decoration: line-through;
-  opacity: 0.35;
+const PulseDot = styled.span<{ color: string }>`
+  width: 8px;
+  height: 8px;
+  background: ${({ color }) => color};
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+  }
 `;
 
-const DiscountBadge = styled.span`
+const WaitlistButton = styled(motion.button)<{ color: string }>`
+  padding: 14px 28px;
+  background: ${({ color }) => color};
+  border: none;
+  color: white;
   font-family: 'Space Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  color: #ED6427;
-`;
-
-const ViewButton = styled(motion.button)<{ isDark: boolean }>`
-  padding: 12px 24px;
-  background: transparent;
-  border: 1px solid ${({ isDark }) => isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
-  color: inherit;
-  font-family: 'Space Mono', monospace;
-  font-size: 9px;
   letter-spacing: 0.15em;
   cursor: pointer;
   transition: all 0.3s;
 
   &:hover {
-    background: ${({ isDark }) => isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
+    box-shadow: 0 10px 30px ${({ color }) => color}40;
   }
-`;
-
-const Price = styled.span`
-  font-family: 'EB Garamond', serif;
-  font-size: 32px;
-  font-style: italic;
 `;
 
 const Badge = styled.span<{ color: string }>`
@@ -268,11 +265,10 @@ const kitColors = ['#A71B1B', '#37385A', '#ED6427'];
 interface Props {
   product: Product;
   index: number;
-  isViewed?: boolean;
 }
 
 export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
-  ({ product, index, isViewed }, ref) => {
+  ({ product, index }, ref) => {
     const navigate = useNavigate();
     const containerRef = useRef(null);
     const isInView = useInView(containerRef, { amount: 0.4 });
@@ -294,7 +290,6 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
     };
     const hasImage = product.id in productImages;
 
-    const formatPrice = (price: number) => `₩${price.toLocaleString()}`;
     const indexLabels = ['01 — Morning', '02 — Afternoon', '03 — Evening', '04 — Discovery'];
 
     const handleViewDetails = () => {
@@ -428,33 +423,30 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
               </Notes>
             )}
 
-            <PriceRow
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.35, delay: 0.25 }}
-            >
-              {product.originalPrice && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <OriginalPrice>{formatPrice(product.originalPrice)}</OriginalPrice>
-                  <DiscountBadge>
-                    {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
-                  </DiscountBadge>
-                </div>
-              )}
-              <Price>{formatPrice(product.price)}</Price>
-            </PriceRow>
-
-            <ViewButton
+            <ComingSoonBadge
               isDark={isDark}
-              onClick={handleViewDetails}
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.3, delay: 0.28 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.3, delay: 0.25 }}
             >
-              VIEW DETAILS
-            </ViewButton>
+              <PulseDot color={product.color} />
+              COMING SOON
+            </ComingSoonBadge>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.3, delay: 0.28 }}
+            >
+              <WaitlistButton
+                color={product.color}
+                onClick={handleViewDetails}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                JOIN WAITLIST
+              </WaitlistButton>
+            </motion.div>
           </Content>
         </Container>
       </Section>
