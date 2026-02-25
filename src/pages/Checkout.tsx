@@ -594,8 +594,8 @@ export const Checkout = () => {
         failUrl: `${window.location.origin}/checkout?fail=true`,
       });
     } catch (error) {
-      // 사용자가 결제창을 닫은 경우
-      console.log('결제 취소:', error);
+      // User closed payment window
+      console.log('Payment cancelled:', error);
     }
     
     setIsProcessing(false);
@@ -670,7 +670,7 @@ export const Checkout = () => {
                     <Label>Name *</Label>
                     <Input
                       type="text"
-                      placeholder="홍길동"
+                      placeholder="Your name"
                       value={shipping.name}
                       onChange={(e) => setShipping({ ...shipping, name: e.target.value })}
                     />
@@ -708,7 +708,7 @@ export const Checkout = () => {
                       onClick={handleAddressSearch}
                     />
                     <AddressSearchBtn type="button" onClick={handleAddressSearch}>
-                      주소 검색
+                      SEARCH
                     </AddressSearchBtn>
                   </AddressInputRow>
                 </FormGroup>
@@ -717,7 +717,7 @@ export const Checkout = () => {
                   <Label>Address *</Label>
                   <Input
                     type="text"
-                    placeholder="주소 검색을 눌러주세요"
+                    placeholder="Click to search address"
                     value={shipping.address}
                     readOnly
                     style={{ cursor: 'pointer', background: '#fafafa' }}
@@ -729,7 +729,7 @@ export const Checkout = () => {
                   <Label>Address Detail</Label>
                   <Input
                     type="text"
-                    placeholder="101호"
+                    placeholder="Apt 101"
                     value={shipping.addressDetail}
                     onChange={(e) => setShipping({ ...shipping, addressDetail: e.target.value })}
                   />
@@ -741,11 +741,11 @@ export const Checkout = () => {
                     value={shipping.memo}
                     onChange={(e) => setShipping({ ...shipping, memo: e.target.value })}
                   >
-                    <option value="">선택해주세요</option>
-                    <option value="door">문 앞에 놓아주세요</option>
-                    <option value="guard">경비실에 맡겨주세요</option>
-                    <option value="call">배송 전 연락 부탁드립니다</option>
-                    <option value="box">택배함에 넣어주세요</option>
+                    <option value="">Select an option</option>
+                    <option value="door">Leave at door</option>
+                    <option value="guard">Leave with security</option>
+                    <option value="call">Call before delivery</option>
+                    <option value="box">Put in delivery box</option>
                   </Select>
                 </FormGroup>
 
@@ -778,7 +778,7 @@ export const Checkout = () => {
                     fontStyle: 'italic',
                     marginBottom: 12 
                   }}>
-                    토스페이먼츠 결제
+                    Toss Payments
                   </div>
                   <div style={{ 
                     fontFamily: 'Space Mono', 
@@ -786,8 +786,8 @@ export const Checkout = () => {
                     opacity: 0.5,
                     lineHeight: 1.8
                   }}>
-                    아래 버튼을 클릭하면<br />
-                    토스페이먼츠 결제창이 열립니다
+                    Click the button below<br />
+                    to open the payment window
                   </div>
                 </div>
 
@@ -827,7 +827,7 @@ export const Checkout = () => {
                   whileHover={{ scale: !isProcessing ? 1.01 : 1 }}
                   whileTap={{ scale: !isProcessing ? 0.99 : 1 }}
                 >
-                  {isProcessing ? 'PROCESSING...' : `토스로 ${formatPrice(grandTotal)} 결제하기`}
+                  {isProcessing ? 'PROCESSING...' : `PAY ${formatPrice(grandTotal)} WITH TOSS`}
                 </SubmitButton>
               </motion.div>
             )}

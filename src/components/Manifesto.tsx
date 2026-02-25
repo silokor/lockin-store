@@ -119,10 +119,10 @@ const SideText = styled(motion.span)<{ side: 'left' | 'right' }>`
 `;
 
 const ingredients = [
-  { en: "Lion's Mane", kr: '노루궁뎅이버섯' },
-  { en: 'Cordyceps', kr: '동충하초' },
-  { en: 'Red Ginseng', kr: '홍삼' },
-  { en: 'L-Theanine', kr: '테아닌' },
+  { en: "Lion's Mane", kr: 'Brain Focus' },
+  { en: 'Cordyceps', kr: 'Energy Flow' },
+  { en: 'Red Ginseng', kr: 'Vitality' },
+  { en: 'L-Theanine', kr: 'Calm Focus' },
 ];
 
 export const Manifesto = () => {
@@ -168,9 +168,9 @@ export const Manifesto = () => {
             transition={{ duration: 1, delay: 0.4 }}
             viewport={{ once: true }}
           >
-            실리콘밸리 1%가 선택한 차세대 음료, 버섯커피.
+            The next-gen beverage chosen by Silicon Valley's top 1%.
             <br />
-            커피 한 잔에 정교한 설계를 담았습니다.
+            Precision engineering in every cup.
           </Description>
 
           <Ingredients

@@ -207,10 +207,10 @@ const ScrollFill = styled(motion.div)`
 const colors = ['#A71B1B', '#37385A', '#ED6427'];
 
 const ingredients = [
-  { en: "Lion's Mane", kr: '노루궁뎅이버섯' },
-  { en: 'Cordyceps', kr: '동충하초' },
-  { en: 'Red Ginseng', kr: '홍삼' },
-  { en: 'L-Theanine', kr: '테아닌' },
+  { en: "Lion's Mane", kr: 'Brain Focus' },
+  { en: 'Cordyceps', kr: 'Energy Flow' },
+  { en: 'Red Ginseng', kr: 'Vitality' },
+  { en: 'L-Theanine', kr: 'Calm Focus' },
 ];
 
 export const Intro = () => {
@@ -272,7 +272,7 @@ export const Intro = () => {
             Lock In Coffee
           </IntroLine>
           <KoreanTextLarge style={{ color: 'var(--black)', opacity: 0.6, marginTop: 32 }}>
-            뇌가 원하는 연료
+            Fuel for your mind
           </KoreanTextLarge>
           <ShopButton
             onClick={() => {
@@ -297,7 +297,7 @@ export const Intro = () => {
           </MediumText>
           <HorizontalLine style={{ opacity: 0.2 }} />
           <KoreanText style={{ color: 'var(--black)', opacity: 0.5 }}>
-            필요한 집중력은 드리고, 불필요한 크래시는 드리지 않습니다
+            All the focus, none of the crash
           </KoreanText>
         </Phase>
 
@@ -317,7 +317,7 @@ export const Intro = () => {
             </SmallText>
           </OrbsSection>
           <KoreanText style={{ color: 'var(--black)', opacity: 0.4, marginTop: 16 }}>
-            세 가지 블렌드, 하나의 루틴이 됩니다
+            Three blends, one ritual
           </KoreanText>
         </Phase>
 
@@ -345,7 +345,7 @@ export const Intro = () => {
             </IngredientItem>
           </IngredientsList>
           <KoreanText style={{ color: 'var(--black)', opacity: 0.4, marginTop: 32 }}>
-            자연에서 온 집중력입니다
+            Focus, powered by nature
           </KoreanText>
         </Phase>
 
@@ -360,7 +360,7 @@ export const Intro = () => {
             who refuse to compromise.
           </MediumText>
           <KoreanText style={{ color: 'var(--black)', opacity: 0.5, marginTop: 24 }}>
-            타협하지 않는 분들을 위해 설계했습니다
+            Built for those who never settle
           </KoreanText>
           <HorizontalLine style={{ opacity: 0.2 }} />
           <SmallText style={{ color: 'var(--black)', opacity: 0.3, marginTop: 20 }}>

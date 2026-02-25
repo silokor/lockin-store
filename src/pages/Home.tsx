@@ -18,7 +18,7 @@ export const Home = ({ scrollToShop = false }: { scrollToShop?: boolean }) => {
   const viewedRef = useRef(viewedProducts);
   const itemsRef = useRef(items);
 
-  // refs 동기화
+  // sync refs
   viewedRef.current = viewedProducts;
   itemsRef.current = items;
 
@@ -52,7 +52,7 @@ export const Home = ({ scrollToShop = false }: { scrollToShop?: boolean }) => {
     return () => observer.disconnect();
   }, [handleIntersect]);
 
-  // /shop 또는 #shop으로 접근 시 상품 섹션으로 스크롤
+  // Scroll to products section when accessing /shop or #shop
   useEffect(() => {
     if (scrollToShop || location.hash === '#shop') {
       setTimeout(() => {
