@@ -190,7 +190,7 @@ const CloseButton = styled(motion.button)`
 `;
 
 // Google Apps Script Web App URL
-const WAITLIST_API = 'https://script.google.com/macros/s/AKfycbxLockInWaitlistAPI/exec';
+const WAITLIST_API = 'https://script.google.com/macros/s/AKfycby88MuyWmfLkwMlh-ZuJASo4C7AVdpiCLQ7Wicu4doe-iUVTvhXFO85KVMZsvtVcIRz/exec';
 
 interface Props {
   isOpen: boolean;

@@ -13,22 +13,24 @@
  * 5. Copy the Web App URL and update WAITLIST_API in WaitlistModal.tsx
  */
 
+const SPREADSHEET_ID = '1_g_vIOWUl8kboi_oDnEOsfBqHk7mTKi32rsuczIW7D8';
 const SHEET_NAME = 'Waitlist';
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let sheet = ss.getSheetByName(SHEET_NAME);
+    
     if (!sheet) {
       // Create sheet if it doesn't exist
-      const ss = SpreadsheetApp.getActiveSpreadsheet();
-      const newSheet = ss.insertSheet(SHEET_NAME);
-      newSheet.appendRow(['Timestamp', 'Name', 'Email', 'Phone', 'Product', 'Source']);
-      newSheet.getRange(1, 1, 1, 6).setFontWeight('bold');
+      sheet = ss.insertSheet(SHEET_NAME);
+      sheet.appendRow(['Timestamp', 'Name', 'Email', 'Phone', 'Product', 'Source']);
+      sheet.getRange(1, 1, 1, 6).setFontWeight('bold');
     }
     
-    const targetSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    const targetSheet = ss.getSheetByName(SHEET_NAME);
     
     // Format timestamp for readability
     const timestamp = data.timestamp ? new Date(data.timestamp).toLocaleString('ko-KR', {
