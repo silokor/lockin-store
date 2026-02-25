@@ -1,90 +1,94 @@
 /**
  * Lock In Coffee - Waitlist Apps Script
- * 
- * Setup:
- * 1. Create a Google Sheet with headers in row 1:
- *    A: Timestamp | B: Name | C: Email | D: Phone | E: Product | F: Source
- * 
- * 2. Go to Extensions > Apps Script
- * 3. Paste this code
- * 4. Deploy > New Deployment > Web App
- *    - Execute as: Me
- *    - Who has access: Anyone
- * 5. Copy the Web App URL and update WAITLIST_API in WaitlistModal.tsx
+ * Uses GET with URL parameters to avoid CORS issues
  */
 
 const SPREADSHEET_ID = '1_g_vIOWUl8kboi_oDnEOsfBqHk7mTKi32rsuczIW7D8';
 const SHEET_NAME = 'Waitlist';
 
-function doPost(e) {
+function doGet(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
-    
+    // Check if this is a data submission or just a status check
+    if (!e.parameter.email) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'Lock In Waitlist API is running' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     let sheet = ss.getSheetByName(SHEET_NAME);
     
     if (!sheet) {
-      // Create sheet if it doesn't exist
       sheet = ss.insertSheet(SHEET_NAME);
       sheet.appendRow(['Timestamp', 'Name', 'Email', 'Phone', 'Product', 'Source']);
       sheet.getRange(1, 1, 1, 6).setFontWeight('bold');
     }
     
-    const targetSheet = ss.getSheetByName(SHEET_NAME);
-    
-    // Format timestamp for readability
-    const timestamp = data.timestamp ? new Date(data.timestamp).toLocaleString('ko-KR', {
+    const timestamp = new Date().toLocaleString('ko-KR', {
       timeZone: 'Asia/Seoul',
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit'
-    }) : new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+    });
     
-    // Append row
-    targetSheet.appendRow([
+    sheet.appendRow([
       timestamp,
-      data.name || '',
-      data.email || '',
-      data.phone || '',
-      data.product || '',
-      data.source || ''
+      e.parameter.name || '',
+      e.parameter.email || '',
+      e.parameter.phone || '',
+      e.parameter.product || '',
+      e.parameter.source || ''
     ]);
     
+    // Return JSONP callback if provided, otherwise JSON
+    const callback = e.parameter.callback;
+    const result = JSON.stringify({ success: true });
+    
+    if (callback) {
+      return ContentService
+        .createTextOutput(callback + '(' + result + ')')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+    
     return ContentService
-      .createTextOutput(JSON.stringify({ success: true }))
+      .createTextOutput(result)
       .setMimeType(ContentService.MimeType.JSON);
       
   } catch (error) {
+    const result = JSON.stringify({ success: false, error: error.message });
+    const callback = e.parameter.callback;
+    
+    if (callback) {
+      return ContentService
+        .createTextOutput(callback + '(' + result + ')')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+    
     return ContentService
-      .createTextOutput(JSON.stringify({ success: false, error: error.message }))
+      .createTextOutput(result)
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-// For testing via GET request
-function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: 'Lock In Waitlist API is running' }))
-    .setMimeType(ContentService.MimeType.JSON);
+function doPost(e) {
+  // Redirect POST to GET handler
+  return doGet(e);
 }
 
 // Test function
 function testAddEntry() {
-  const testData = {
-    postData: {
-      contents: JSON.stringify({
-        name: 'Test User',
-        email: 'test@example.com',
-        phone: '010-1234-5678',
-        product: 'Signature',
-        source: 'instagram',
-        timestamp: new Date().toISOString()
-      })
+  const mockEvent = {
+    parameter: {
+      name: 'Test User',
+      email: 'test@example.com',
+      phone: '010-1234-5678',
+      product: 'Signature',
+      source: 'instagram'
     }
   };
   
-  const result = doPost(testData);
+  const result = doGet(mockEvent);
   Logger.log(result.getContent());
 }
