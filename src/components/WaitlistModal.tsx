@@ -62,6 +62,15 @@ const HeaderSub = styled.p`
   opacity: 0.8;
 `;
 
+const HeaderOffer = styled.p`
+  font-family: 'EB Garamond', serif;
+  font-size: 18px;
+  font-style: italic;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+`;
+
 const Body = styled.div`
   padding: 40px;
 `;
@@ -284,12 +293,12 @@ export const WaitlistModal = ({ isOpen, onClose, productName, productColor }: Pr
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <SuccessIcon>✓</SuccessIcon>
+                  <SuccessIcon>🎉</SuccessIcon>
                   <SuccessTitle>You're on the list</SuccessTitle>
                   <SuccessText>
-                    We'll notify you when {productName} is available.
+                    Your 30% discount code will be sent to your email at launch.
                     <br />
-                    Thank you for your interest.
+                    Thank you for joining us.
                   </SuccessText>
                   <CloseButton
                     onClick={handleClose}
@@ -309,6 +318,7 @@ export const WaitlistModal = ({ isOpen, onClose, productName, productColor }: Pr
                   <Header color={productColor}>
                     <HeaderTitle>Join the Waitlist</HeaderTitle>
                     <HeaderSub>{productName}</HeaderSub>
+                    <HeaderOffer>Get 30% off at launch</HeaderOffer>
                   </Header>
 
                   <Body>
