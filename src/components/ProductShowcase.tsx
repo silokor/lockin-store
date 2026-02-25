@@ -1,8 +1,8 @@
-import { forwardRef, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { forwardRef, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import type { Product } from '../data/products';
+import { WaitlistModal } from './WaitlistModal';
 
 const Section = styled.section<{ isDark: boolean }>`
   min-height: 100vh;
@@ -91,7 +91,6 @@ const FloatingImage = styled(motion.img)<{ padding?: number }>`
   transition: transform 0.5s ease;
 `;
 
-// Kit용 미니 오브
 const KitOrbs = styled(motion.div)`
   display: flex;
   gap: 24px;
@@ -192,7 +191,6 @@ const Note = styled(motion.span)<{ isDark: boolean }>`
   }
 `;
 
-// Kit 구성품
 const Includes = styled(motion.div)`
   margin-bottom: 32px;
 `;
@@ -269,12 +267,12 @@ interface Props {
 
 export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
   ({ product, index }, ref) => {
-    const navigate = useNavigate();
     const containerRef = useRef(null);
     const isInView = useInView(containerRef, { amount: 0.4 });
     const isDark = index % 2 !== 0 && product.id !== 'house';
     const isEven = index % 2 === 1;
     const isKit = product.isKit;
+    const [showWaitlist, setShowWaitlist] = useState(false);
 
     const { scrollYProgress } = useScroll({
       target: containerRef,
@@ -292,164 +290,169 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
 
     const indexLabels = ['01 — Morning', '02 — Afternoon', '03 — Evening', '04 — Discovery'];
 
-    const handleViewDetails = () => {
-      navigate(`/product/${product.id}`);
-    };
-
     return (
-      <Section ref={ref} data-product-id={product.id} isDark={isDark}>
-        <Container ref={containerRef}>
-          <Visual isEven={isEven} onClick={handleViewDetails}>
-            {isKit ? (
-              <KitOrbs style={{ y: orbY }}>
-                {kitColors.map((color, i) => (
-                  <MiniOrb
-                    key={color}
-                    color={color}
-                    initial={{ scale: 0, y: 30 }}
-                    animate={isInView ? { scale: 1, y: 0 } : {}}
-                    transition={{ duration: 0.4, delay: 0.1 + i * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
-                    whileHover={{ scale: 1.1 }}
-                  />
-                ))}
-              </KitOrbs>
-            ) : (
-              <OrbContainer style={{ y: orbY }}>
-                <Ring color={product.color} size={320} />
-                <Ring color={product.color} size={380} style={{ opacity: 0.5 }} />
-                <Orb
-                  color={product.color}
-                  size={200}
-                  initial={{ scale: 0 }}
-                  animate={isInView ? { scale: 1 } : {}}
-                  transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                  whileHover={{ scale: 1.05 }}
-                />
-                {hasImage && (
-                  <FloatingImage
-                    src={productImages[product.id]}
-                    alt={product.name}
-                    padding={product.id === 'decaf' || product.id === 'house' ? 20 : 0}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={isInView ? { scale: 1, opacity: 1 } : {}}
-                    transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
+      <>
+        <Section ref={ref} data-product-id={product.id} isDark={isDark}>
+          <Container ref={containerRef}>
+            <Visual isEven={isEven} onClick={() => setShowWaitlist(true)}>
+              {isKit ? (
+                <KitOrbs style={{ y: orbY }}>
+                  {kitColors.map((color, i) => (
+                    <MiniOrb
+                      key={color}
+                      color={color}
+                      initial={{ scale: 0, y: 30 }}
+                      animate={isInView ? { scale: 1, y: 0 } : {}}
+                      transition={{ duration: 0.4, delay: 0.1 + i * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
+                      whileHover={{ scale: 1.1 }}
+                    />
+                  ))}
+                </KitOrbs>
+              ) : (
+                <OrbContainer style={{ y: orbY }}>
+                  <Ring color={product.color} size={320} />
+                  <Ring color={product.color} size={380} style={{ opacity: 0.5 }} />
+                  <Orb
+                    color={product.color}
+                    size={200}
+                    initial={{ scale: 0 }}
+                    animate={isInView ? { scale: 1 } : {}}
+                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                     whileHover={{ scale: 1.05 }}
                   />
-                )}
-              </OrbContainer>
-            )}
-          </Visual>
+                  {hasImage && (
+                    <FloatingImage
+                      src={productImages[product.id]}
+                      alt={product.name}
+                      padding={product.id === 'decaf' || product.id === 'house' ? 20 : 0}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={isInView ? { scale: 1, opacity: 1 } : {}}
+                      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
+                      whileHover={{ scale: 1.05 }}
+                    />
+                  )}
+                </OrbContainer>
+              )}
+            </Visual>
 
-          <Content isEven={isEven} style={{ y: contentY }}>
-            <Index
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 0.3 } : {}}
-              transition={{ duration: 0.35 }}
-            >
-              {indexLabels[index]}
-            </Index>
+            <Content isEven={isEven} style={{ y: contentY }}>
+              <Index
+                initial={{ opacity: 0 }}
+                animate={isInView ? { opacity: 0.3 } : {}}
+                transition={{ duration: 0.35 }}
+              >
+                {indexLabels[index]}
+              </Index>
 
-            <ProductName
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.45, delay: 0.05 }}
-            >
-              {product.name}
-            </ProductName>
+              <ProductName
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.45, delay: 0.05 }}
+              >
+                {product.name}
+              </ProductName>
 
-            <ProductNameKr
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 0.5 } : {}}
-              transition={{ duration: 0.35, delay: 0.1 }}
-            >
-              {product.nameKr}
-            </ProductNameKr>
+              <ProductNameKr
+                initial={{ opacity: 0 }}
+                animate={isInView ? { opacity: 0.5 } : {}}
+                transition={{ duration: 0.35, delay: 0.1 }}
+              >
+                {product.nameKr}
+              </ProductNameKr>
 
-            {product.badge && (
+              {product.badge && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={isInView ? { opacity: 1 } : {}}
+                  transition={{ duration: 0.3, delay: 0.12 }}
+                  style={{ marginBottom: 20 }}
+                >
+                  <Badge color={product.color}>{product.badge}</Badge>
+                </motion.div>
+              )}
+
+              <Description
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 0.7, y: 0 } : {}}
+                transition={{ duration: 0.4, delay: 0.15 }}
+              >
+                {product.description}
+              </Description>
+
+              <DescriptionKr
+                initial={{ opacity: 0, y: 15 }}
+                animate={isInView ? { opacity: 0.5, y: 0 } : {}}
+                transition={{ duration: 0.4, delay: 0.18 }}
+              >
+                {product.descriptionKr}
+              </DescriptionKr>
+
+              {isKit && product.includes ? (
+                <Includes
+                  initial={{ opacity: 0 }}
+                  animate={isInView ? { opacity: 1 } : {}}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  <NotesLabel>Package Includes</NotesLabel>
+                  {product.includes.map((item) => (
+                    <IncludeItem key={item} isDark={isDark}>{item}</IncludeItem>
+                  ))}
+                </Includes>
+              ) : (
+                <Notes
+                  initial={{ opacity: 0 }}
+                  animate={isInView ? { opacity: 1 } : {}}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  {product.tastingNotes.map((note, i) => (
+                    <Note
+                      key={note}
+                      isDark={isDark}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={isInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ duration: 0.25, delay: 0.25 + i * 0.03 }}
+                    >
+                      {note}
+                    </Note>
+                  ))}
+                </Notes>
+              )}
+
+              <ComingSoonBadge
+                isDark={isDark}
+                initial={{ opacity: 0 }}
+                animate={isInView ? { opacity: 1 } : {}}
+                transition={{ duration: 0.3, delay: 0.25 }}
+              >
+                <PulseDot color={product.color} />
+                COMING SOON
+              </ComingSoonBadge>
+
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={isInView ? { opacity: 1 } : {}}
-                transition={{ duration: 0.3, delay: 0.12 }}
-                style={{ marginBottom: 20 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.3, delay: 0.28 }}
               >
-                <Badge color={product.color}>{product.badge}</Badge>
+                <WaitlistButton
+                  color={product.color}
+                  onClick={() => setShowWaitlist(true)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  JOIN WAITLIST
+                </WaitlistButton>
               </motion.div>
-            )}
+            </Content>
+          </Container>
+        </Section>
 
-            <Description
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 0.7, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: 0.15 }}
-            >
-              {product.description}
-            </Description>
-
-            <DescriptionKr
-              initial={{ opacity: 0, y: 15 }}
-              animate={isInView ? { opacity: 0.5, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: 0.18 }}
-            >
-              {product.descriptionKr}
-            </DescriptionKr>
-
-            {isKit && product.includes ? (
-              <Includes
-                initial={{ opacity: 0 }}
-                animate={isInView ? { opacity: 1 } : {}}
-                transition={{ duration: 0.3, delay: 0.2 }}
-              >
-                <NotesLabel>Package Includes</NotesLabel>
-                {product.includes.map((item) => (
-                  <IncludeItem key={item} isDark={isDark}>{item}</IncludeItem>
-                ))}
-              </Includes>
-            ) : (
-              <Notes
-                initial={{ opacity: 0 }}
-                animate={isInView ? { opacity: 1 } : {}}
-                transition={{ duration: 0.3, delay: 0.2 }}
-              >
-                {product.tastingNotes.map((note, i) => (
-                  <Note
-                    key={note}
-                    isDark={isDark}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.25, delay: 0.25 + i * 0.03 }}
-                  >
-                    {note}
-                  </Note>
-                ))}
-              </Notes>
-            )}
-
-            <ComingSoonBadge
-              isDark={isDark}
-              initial={{ opacity: 0 }}
-              animate={isInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.3, delay: 0.25 }}
-            >
-              <PulseDot color={product.color} />
-              COMING SOON
-            </ComingSoonBadge>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.3, delay: 0.28 }}
-            >
-              <WaitlistButton
-                color={product.color}
-                onClick={handleViewDetails}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                JOIN WAITLIST
-              </WaitlistButton>
-            </motion.div>
-          </Content>
-        </Container>
-      </Section>
+        <WaitlistModal
+          isOpen={showWaitlist}
+          onClose={() => setShowWaitlist(false)}
+          productName={product.name}
+          productColor={product.color}
+        />
+      </>
     );
   }
 );
