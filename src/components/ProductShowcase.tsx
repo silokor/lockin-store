@@ -1,4 +1,5 @@
 import { forwardRef, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import type { Product } from '../data/products';
@@ -223,6 +224,26 @@ const Badge = styled.span<{ color: string }>`
   color: white;
 `;
 
+const DetailButton = styled(motion.button)<{ isDark: boolean; accentColor: string }>`
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 14px 28px;
+  margin-top: 24px;
+  background: transparent;
+  color: ${({ isDark }) => isDark ? 'var(--white)' : 'var(--black)'};
+  border: 1px solid ${({ isDark }) => isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    background: ${({ accentColor }) => accentColor};
+    color: white;
+    border-color: ${({ accentColor }) => accentColor};
+  }
+`;
+
 const kitColors = ['#A71B1B', '#37385A', '#ED6427'];
 
 interface Props {
@@ -232,6 +253,7 @@ interface Props {
 
 export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
   ({ product, index }, ref) => {
+    const navigate = useNavigate();
     const containerRef = useRef(null);
     const isInView = useInView(containerRef, { amount: 0.4 });
     const isDark = index % 2 !== 0 && product.id !== 'house';
@@ -379,6 +401,19 @@ export const ProductShowcase = forwardRef<HTMLDivElement, Props>(
               <Price>{formatPrice(product.price)}</Price>
               {product.badge && <Badge color={product.color}>{product.badge}</Badge>}
             </PriceRow>
+
+            <DetailButton
+              isDark={isDark}
+              accentColor={product.color}
+              onClick={() => navigate(`/product/${product.id}`)}
+              initial={{ opacity: 0, y: 15 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              VIEW DETAILS →
+            </DetailButton>
           </Content>
         </Container>
       </Section>
