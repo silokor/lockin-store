@@ -1,6 +1,6 @@
-import styled from '@emotion/styled';
-import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import styled from "@emotion/styled";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 
 const Section = styled.footer`
   padding: 160px 24px 80px;
@@ -15,7 +15,7 @@ const Container = styled.div`
 `;
 
 const Logo = styled(motion.h2)`
-  font-family: 'EB Garamond', serif;
+  font-family: "EB Garamond", serif;
   font-size: clamp(48px, 10vw, 120px);
   font-weight: 400;
   font-style: italic;
@@ -23,7 +23,7 @@ const Logo = styled(motion.h2)`
 `;
 
 const Tagline = styled(motion.p)`
-  font-family: 'EB Garamond', serif;
+  font-family: "EB Garamond", serif;
   font-size: 18px;
   font-style: italic;
   opacity: 0.4;
@@ -51,7 +51,7 @@ const LinkGroup = styled.div`
 `;
 
 const Link = styled(motion.a)`
-  font-family: 'Space Mono', monospace;
+  font-family: "Space Mono", monospace;
   font-size: 11px;
   letter-spacing: 0.15em;
   opacity: 0.4;
@@ -67,7 +67,7 @@ const Link = styled(motion.a)`
 const Divider = styled(motion.div)`
   width: 60px;
   height: 1px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   margin: 0 auto 40px;
 `;
 
@@ -75,7 +75,7 @@ const Bottom = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  
+
   @media (max-width: 640px) {
     flex-direction: column;
     gap: 16px;
@@ -83,10 +83,29 @@ const Bottom = styled.div`
 `;
 
 const Copyright = styled.span`
-  font-family: 'Space Mono', monospace;
+  font-family: "Space Mono", monospace;
   font-size: 10px;
   letter-spacing: 0.1em;
   opacity: 0.3;
+`;
+
+const BusinessInfo = styled.div`
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+`;
+
+const BusinessText = styled.p`
+  font-family:
+    "Pretendard",
+    -apple-system,
+    sans-serif;
+  font-size: 11px;
+  line-height: 1.8;
+  opacity: 0.25;
+  color: var(--white);
+  word-break: keep-all;
 `;
 
 export const Footer = () => {
@@ -118,15 +137,27 @@ export const Footer = () => {
           transition={{ duration: 0.8, delay: 0.4 }}
         >
           <LinkGroup>
-            <Link href="https://instagram.com/thezonebio" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://instagram.com/thezonebio"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               @thezonebio
             </Link>
-            <Link href="https://instagram.com/thezonebio.kr" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://instagram.com/thezonebio.kr"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               @thezonebio.kr
             </Link>
           </LinkGroup>
           <LinkGroup>
-            <Link href="https://smartstore.naver.com/thezonebio" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://smartstore.naver.com/thezonebio"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Naver Smartstore
             </Link>
             <Link href="mailto:contact@thezonebio.com">
@@ -145,6 +176,21 @@ export const Footer = () => {
           <Copyright>© 2026 THE ZONE BIO</Copyright>
           <Copyright>SEOUL, KOREA</Copyright>
         </Bottom>
+
+        <BusinessInfo>
+          <BusinessText>
+            상호 : 더존바이오 &nbsp;|&nbsp; 대표 : 박민성 &nbsp;|&nbsp;
+            사업자등록번호 : 787-31-01774
+            <br />
+            사업장소재지 : 인천광역시 연수구 인천타워대로 323, A동 31층
+            더블유엔73호(송도동, 송도 센트로드)
+            <br />
+            업태 : 도매 및 소매업 &nbsp;|&nbsp; 종목 : 전자상거래 소매업
+            &nbsp;|&nbsp; 이메일 : me@thezonebio.com
+            <br />
+            통신판매업신고번호: 제 2025-인천연수구-2735 호
+          </BusinessText>
+        </BusinessInfo>
       </Container>
     </Section>
   );
