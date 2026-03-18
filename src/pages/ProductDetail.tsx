@@ -417,7 +417,7 @@ export const ProductDetail = () => {
         transition={{ duration: 0.6 }}
       >
         <BackLink to="/">← BACK TO COLLECTION</BackLink>
-        <CartButton onClick={() => navigate('/')}>
+        <CartButton onClick={() => navigate('/checkout')}>
           CART ({itemCount})
         </CartButton>
       </Nav>
