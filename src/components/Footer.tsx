@@ -164,6 +164,11 @@ export const Footer = () => {
               contact@thezonebio.com
             </Link>
           </LinkGroup>
+          <LinkGroup>
+            <Link href="tel:010-9942-7360">
+              ☎ CUSTOMER CENTER : 010-9942-7360
+            </Link>
+          </LinkGroup>
         </LinksSection>
 
         <Divider
