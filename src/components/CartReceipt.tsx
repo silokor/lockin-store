@@ -1,49 +1,70 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from '@emotion/styled';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useCart } from '../context/CartContext';
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "@emotion/styled";
+import { motion, AnimatePresence, useSpring, useMotionValue } from "framer-motion";
+import { useCart } from "../context/CartContext";
 
-const Wrapper = styled(motion.div)`
+/* ── Styled Components ── */
+
+const Wrapper = styled(motion.div)<{ $isMobile: boolean }>`
   position: fixed;
-  bottom: 40px;
-  right: 40px;
-  width: 300px;
   z-index: 100;
-  
-  @media (max-width: 640px) {
-    bottom: 20px;
-    right: 20px;
-    left: 20px;
-    width: auto;
-  }
+
+  ${({ $isMobile }) =>
+    $isMobile
+      ? `
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+  `
+      : `
+    bottom: 40px;
+    right: 40px;
+    width: 320px;
+  `}
 `;
 
-const ReceiptPaper = styled(motion.div)`
-  background: #ffffff;
-  color: var(--black);
-  font-family: 'Space Mono', monospace;
+const ReceiptCard = styled(motion.div)<{ $isMobile: boolean }>`
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(13, 13, 13, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--white, #f5f5f5);
+  font-family: "Space Mono", monospace;
   padding: 28px 24px;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+
+  ${({ $isMobile }) =>
+    $isMobile
+      ? `
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  `
+      : `
+    border-radius: 16px;
+  `}
 `;
 
 const Header = styled.div`
   text-align: center;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 20px;
 `;
 
 const Logo = styled.h3`
-  font-family: 'EB Garamond', serif;
+  font-family: "EB Garamond", serif;
   font-size: 18px;
   font-style: italic;
   font-weight: 400;
   letter-spacing: 0.05em;
+  color: var(--white, #f5f5f5);
 `;
 
-const ItemCount = styled.span`
+const ItemCountLabel = styled.span`
   font-size: 10px;
   opacity: 0.4;
   display: block;
@@ -56,10 +77,11 @@ const ItemsList = styled.div`
   overflow-y: auto;
 
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 3px;
   }
   &::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.1);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
   }
 `;
 
@@ -68,8 +90,8 @@ const Item = styled(motion.div)`
   justify-content: space-between;
   align-items: flex-start;
   padding: 14px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
   &:last-of-type {
     border-bottom: none;
   }
@@ -86,11 +108,12 @@ const ItemInfo = styled.div`
 `;
 
 const ItemName = styled.span`
-  font-family: 'EB Garamond', serif;
+  font-family: "EB Garamond", serif;
   font-size: 14px;
   font-style: italic;
   display: block;
   margin-bottom: 2px;
+  color: var(--white, #f5f5f5);
 `;
 
 const ItemSub = styled.span`
@@ -112,15 +135,16 @@ const RemoveBtn = styled(motion.button)`
   border: none;
   background: transparent;
   font-size: 14px;
-  color: rgba(0,0,0,0.3);
+  color: rgba(255, 255, 255, 0.3);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: 4px;
+  transition: color 0.2s;
 
   &:hover {
-    color: #ED6427;
+    color: #ed6427;
   }
 `;
 
@@ -131,18 +155,27 @@ const QuantityControl = styled.div`
 `;
 
 const QtyBtn = styled.button`
-  width: 20px;
-  height: 20px;
-  border: 1px solid rgba(0,0,0,0.1);
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
   background: transparent;
   font-size: 12px;
+  color: var(--white, #f5f5f5);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
 
-  &:hover {
-    background: rgba(0,0,0,0.05);
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.25;
+    cursor: default;
   }
 `;
 
@@ -150,18 +183,20 @@ const QtyNum = styled.span`
   font-size: 11px;
   min-width: 20px;
   text-align: center;
+  overflow: hidden;
 `;
 
 const ItemPrice = styled.span`
-  font-family: 'EB Garamond', serif;
+  font-family: "EB Garamond", serif;
   font-size: 14px;
   font-style: italic;
   min-width: 70px;
   text-align: right;
+  color: var(--white, #f5f5f5);
 `;
 
-const Divider = styled.div`
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+const DividerLine = styled.div`
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin: 16px 0;
 `;
 
@@ -178,36 +213,62 @@ const TotalLabel = styled.span`
   opacity: 0.4;
 `;
 
-const TotalAmount = styled(motion.span)`
-  font-family: 'EB Garamond', serif;
-  font-size: 24px;
+const TotalAmount = styled.span`
+  font-family: "EB Garamond", serif;
+  font-size: 28px;
   font-style: italic;
+  color: var(--white, #f5f5f5);
 `;
 
 const CheckoutBtn = styled(motion.button)`
   width: 100%;
-  padding: 14px;
-  background: var(--black);
+  padding: 16px;
+  background: #ed6427;
   border: none;
-  color: var(--white);
-  font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  font-weight: 400;
+  border-radius: 10px;
+  color: #fff;
+  font-family: "Space Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
   letter-spacing: 0.2em;
   cursor: pointer;
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 24px rgba(237, 100, 39, 0.3);
+  transition: box-shadow 0.3s ease;
 
   &:hover {
-    background: #333;
+    box-shadow: 0 6px 32px rgba(237, 100, 39, 0.5);
   }
 `;
 
 const ShippingNote = styled.div`
   font-size: 9px;
-  opacity: 0.4;
+  opacity: 0.3;
   text-align: center;
   margin-top: 12px;
 `;
+
+/* ── Animated Counter ── */
+
+const AnimatedNumber = ({ value }: { value: number }) => {
+  const motionVal = useMotionValue(value);
+  const spring = useSpring(motionVal, { stiffness: 80, damping: 20 });
+  const [display, setDisplay] = useState(value);
+
+  useEffect(() => {
+    motionVal.set(value);
+  }, [value, motionVal]);
+
+  useEffect(() => {
+    const unsubscribe = spring.on("change", (v: number) => {
+      setDisplay(Math.round(v));
+    });
+    return unsubscribe;
+  }, [spring]);
+
+  return <>{`₩${display.toLocaleString()}`}</>;
+};
+
+/* ── Component ── */
 
 export const CartReceipt = () => {
   const navigate = useNavigate();
@@ -215,14 +276,14 @@ export const CartReceipt = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const lastScrollY = useRef(0);
-  const scrollDirection = useRef<'up' | 'down' | null>(null);
+  const scrollDirection = useRef<"up" | "down" | null>(null);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 640);
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   useEffect(() => {
@@ -236,40 +297,43 @@ export const CartReceipt = () => {
 
     const isAtBottom = () => {
       const threshold = 50;
-      return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - threshold;
+      return (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - threshold
+      );
     };
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       if (currentScrollY < lastScrollY.current) {
-        scrollDirection.current = 'up';
+        scrollDirection.current = "up";
       } else if (currentScrollY > lastScrollY.current) {
-        scrollDirection.current = 'down';
+        scrollDirection.current = "down";
       }
-      
+
       lastScrollY.current = currentScrollY;
-      
+
       if (isAtBottom()) {
         clearTimeout(scrollTimeout.current);
         setIsVisible(true);
         return;
       }
-      
+
       setIsVisible(false);
       clearTimeout(scrollTimeout.current);
 
       scrollTimeout.current = setTimeout(() => {
-        if (scrollDirection.current === 'up') {
+        if (scrollDirection.current === "up") {
           setIsVisible(true);
         }
       }, 50);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
       clearTimeout(scrollTimeout.current);
     };
   }, [isMobile]);
@@ -278,19 +342,38 @@ export const CartReceipt = () => {
 
   const shouldShow = items.length > 0 && isVisible;
 
+  const wrapperVariants = isMobile
+    ? {
+        initial: { y: "100%", opacity: 0 },
+        animate: { y: 0, opacity: 1 },
+        exit: { y: "100%", opacity: 0 },
+      }
+    : {
+        initial: { y: 40, opacity: 0, scale: 0.96 },
+        animate: { y: 0, opacity: 1, scale: 1 },
+        exit: { y: 40, opacity: 0, scale: 0.96 },
+      };
+
   return (
     <AnimatePresence>
       {shouldShow && (
         <Wrapper
-          initial={{ x: '120%', rotate: 3 }}
-          animate={{ x: 0, rotate: 1 }}
-          exit={{ x: '120%', rotate: 5 }}
-          transition={{ type: 'spring', stiffness: 80, damping: 15 }}
+          $isMobile={isMobile}
+          initial={wrapperVariants.initial}
+          animate={wrapperVariants.animate}
+          exit={wrapperVariants.exit}
+          transition={{
+            type: "spring",
+            stiffness: 260,
+            damping: 28,
+          }}
         >
-          <ReceiptPaper>
+          <ReceiptCard $isMobile={isMobile}>
             <Header>
               <Logo>Lock In</Logo>
-              <ItemCount>{itemCount} {itemCount === 1 ? 'item' : 'items'}</ItemCount>
+              <ItemCountLabel>
+                {itemCount} {itemCount === 1 ? "item" : "items"}
+              </ItemCountLabel>
             </Header>
 
             <ItemsList>
@@ -299,30 +382,62 @@ export const CartReceipt = () => {
                   <Item
                     key={item.id}
                     layout
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 10 }}
-                    transition={{ duration: 0.2 }}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -20, filter: "blur(4px)" }}
+                    transition={{ duration: 0.25 }}
                   >
                     <ItemInfo onClick={() => navigate(`/product/${item.id}`)}>
                       <ItemName>{item.name}</ItemName>
                       <ItemSub>{item.nameKr}</ItemSub>
                     </ItemInfo>
                     <ItemRight>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <ItemPrice>{formatPrice(item.price * item.quantity)}</ItemPrice>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
+                        <ItemPrice>
+                          {formatPrice(item.price * item.quantity)}
+                        </ItemPrice>
                         <RemoveBtn
                           onClick={() => removeFromCart(item.id)}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                          whileHover={{ scale: 1.15 }}
+                          whileTap={{ scale: 0.85 }}
                         >
-                          ×
+                          &times;
                         </RemoveBtn>
                       </div>
                       <QuantityControl>
-                        <QtyBtn onClick={() => updateQuantity(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>−</QtyBtn>
-                        <QtyNum>{item.quantity}</QtyNum>
-                        <QtyBtn onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</QtyBtn>
+                        <QtyBtn
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity - 1)
+                          }
+                          disabled={item.quantity <= 1}
+                        >
+                          −
+                        </QtyBtn>
+                        <QtyNum>
+                          <motion.span
+                            key={item.quantity}
+                            initial={{ y: -8, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 8, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                            style={{ display: "inline-block" }}
+                          >
+                            {item.quantity}
+                          </motion.span>
+                        </QtyNum>
+                        <QtyBtn
+                          onClick={() =>
+                            updateQuantity(item.id, item.quantity + 1)
+                          }
+                        >
+                          +
+                        </QtyBtn>
                       </QuantityControl>
                     </ItemRight>
                   </Item>
@@ -330,26 +445,25 @@ export const CartReceipt = () => {
               </AnimatePresence>
             </ItemsList>
 
-            <Divider />
+            <DividerLine />
 
             <TotalRow>
               <TotalLabel>TOTAL</TotalLabel>
-              <TotalAmount
-                key={total}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                {formatPrice(total)}
+              <TotalAmount>
+                <AnimatedNumber value={total} />
               </TotalAmount>
             </TotalRow>
 
-            <CheckoutBtn 
-              onClick={() => navigate('/checkout')}
-              whileTap={{ scale: 0.98 }}
+            <CheckoutBtn
+              onClick={() => navigate("/checkout")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
             >
               CHECKOUT
             </CheckoutBtn>
-          </ReceiptPaper>
+
+            <ShippingNote>배송비 별도</ShippingNote>
+          </ReceiptCard>
         </Wrapper>
       )}
     </AnimatePresence>

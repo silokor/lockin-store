@@ -5,6 +5,7 @@ import { Intro } from '../components/Intro';
 import { Manifesto } from '../components/Manifesto';
 import { ProductShowcase } from '../components/ProductShowcase';
 import { Footer } from '../components/Footer';
+import { CartReceipt } from '../components/CartReceipt';
 import { products } from '../data/products';
 import { useCart } from '../context/CartContext';
 
@@ -62,6 +63,7 @@ export const Home = () => {
         />
       ))}
       <Footer />
+      <CartReceipt />
     </>
   );
 };

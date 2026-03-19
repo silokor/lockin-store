@@ -49,7 +49,9 @@ const Nav = styled(motion.nav)`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--warm);
+  background: rgba(250, 248, 245, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(0,0,0,0.05);
 
   @media (max-width: 768px) {
@@ -174,20 +176,22 @@ const Label = styled.label`
 const Input = styled.input`
   width: 100%;
   padding: 16px 20px;
-  border: 1px solid rgba(0,0,0,0.1);
-  background: white;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 2px;
+  background: rgba(255,255,255,0.8);
   font-family: 'Space Mono', monospace;
   font-size: 14px;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
 
   &:focus {
     outline: none;
     border-color: var(--black);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    background: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
   }
 
   &::placeholder {
-    opacity: 0.3;
+    opacity: 0.25;
   }
 `;
 
@@ -243,6 +247,8 @@ const OrderCard = styled.div`
   background: white;
   padding: 32px;
   border: 1px solid rgba(0,0,0,0.05);
+  position: sticky;
+  top: 120px;
 `;
 
 const OrderTitle = styled.h3`
@@ -403,6 +409,11 @@ const SubmitButton = styled(motion.button)`
   letter-spacing: 0.2em;
   cursor: pointer;
   margin-top: 24px;
+  transition: box-shadow 0.4s ease;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
 
   &:disabled {
     opacity: 0.5;

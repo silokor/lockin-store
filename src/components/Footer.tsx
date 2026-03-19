@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Link as RouterLink } from "react-router-dom";
 
 const Section = styled.footer`
   padding: 160px 24px 80px;
@@ -108,6 +109,27 @@ const BusinessText = styled.p`
   word-break: keep-all;
 `;
 
+const PolicyLinks = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 24px;
+`;
+
+const PolicyLink = styled(RouterLink)`
+  font-family: "Space Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0.35;
+  color: var(--white);
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
+
 export const Footer = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
@@ -164,11 +186,6 @@ export const Footer = () => {
               contact@thezonebio.com
             </Link>
           </LinkGroup>
-          <LinkGroup>
-            <Link href="tel:010-9942-7360">
-              ☎ CUSTOMER CENTER : 010-9942-7360
-            </Link>
-          </LinkGroup>
         </LinksSection>
 
         <Divider
@@ -194,7 +211,13 @@ export const Footer = () => {
             &nbsp;|&nbsp; 이메일 : me@thezonebio.com
             <br />
             통신판매업신고번호: 제 2025-인천연수구-2735 호
+            <br />
+            고객센터 : 010-9942-7360
           </BusinessText>
+          <PolicyLinks>
+            <PolicyLink to="/refund-policy">환불정책</PolicyLink>
+            <PolicyLink to="/terms">이용약관</PolicyLink>
+          </PolicyLinks>
         </BusinessInfo>
       </Container>
     </Section>

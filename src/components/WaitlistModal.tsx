@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Overlay = styled(motion.div)`
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,6 +21,7 @@ const Modal = styled(motion.div)`
   max-width: 480px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.4);
 `;
 
 const CloseBtn = styled.button`
