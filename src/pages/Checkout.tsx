@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Global } from '@emotion/react';
 import { globalStyles } from '../styles/global';
 import { useCart } from '../context/CartContext';
+
+const API_URL = "https://bio-hacking-coffee-api.onrender.com";
 
 declare global {
   interface Window {
@@ -19,15 +21,13 @@ declare global {
         }) => void;
       }) => { open: () => void };
     };
-    TossPayments: (clientKey: string) => {
-      requestPayment: (method: string, options: {
-        amount: number;
-        orderId: string;
-        orderName: string;
-        customerName: string;
-        successUrl: string;
-        failUrl: string;
-      }) => Promise<void>;
+    TossPayments: ((clientKey: string) => {
+      payment: (options: { customerKey: string }) => {
+        requestPayment: (options: Record<string, any>) => Promise<void>;
+      };
+      ANONYMOUS: string;
+    }) & {
+      ANONYMOUS: string;
     };
   }
 }
@@ -518,10 +518,12 @@ type CheckoutStep = 'shipping' | 'payment';
 
 export const Checkout = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { items, total, clearCart, updateQuantity, removeFromCart } = useCart();
   const [step, setStep] = useState<CheckoutStep>('shipping');
   const [showSuccess, setShowSuccess] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [orderResult, setOrderResult] = useState<Record<string, any> | null>(null);
 
   const [shipping, setShipping] = useState({
     name: '',
@@ -540,6 +542,59 @@ export const Checkout = () => {
     cardCvc: '',
     cardName: ''
   });
+
+  // 결제 성공 콜백 처리
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const paymentKey = searchParams.get('paymentKey');
+    const orderId = searchParams.get('orderId');
+    const amount = searchParams.get('amount');
+
+    if (success === 'true' && paymentKey && orderId && amount) {
+      // 서버에 결제 승인 요청
+      fetch(`${API_URL}/api/payment/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentKey,
+          orderId,
+          amount: Number(amount),
+        }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          setOrderResult(data);
+          setShowSuccess(true);
+
+          // 배송 정보 전송
+          const savedShipping = sessionStorage.getItem('lockin_shipping');
+          if (savedShipping) {
+            const ship = JSON.parse(savedShipping);
+            fetch(`${API_URL}/api/orders/${orderId}/shipping`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(ship),
+            }).catch(() => {});
+            sessionStorage.removeItem('lockin_shipping');
+          }
+          sessionStorage.removeItem('lockin_cart');
+          clearCart();
+        })
+        .catch(err => {
+          console.error('결제 승인 실패:', err);
+          alert('결제 승인 중 오류가 발생했습니다. 고객센터에 문의해주세요.');
+        });
+    }
+
+    // 결제 실패 처리
+    const fail = searchParams.get('fail');
+    if (fail === 'true') {
+      const code = searchParams.get('code') || '';
+      const message = searchParams.get('message') || '결제에 실패했습니다';
+      alert(`결제 실패: ${message} (${code})`);
+      navigate('/checkout', { replace: true });
+    }
+  }, [searchParams]);
 
   const shippingFee = 0;
   const grandTotal = total + shippingFee;
@@ -582,33 +637,38 @@ export const Checkout = () => {
 
   const handlePaymentSubmit = async () => {
     setIsProcessing(true);
-    
+
+    // 배송/장바구니 정보를 sessionStorage에 저장 (결제 후 전송용)
+    sessionStorage.setItem('lockin_shipping', JSON.stringify(shipping));
+    sessionStorage.setItem('lockin_cart', JSON.stringify(items));
+
     try {
-      // 토스페이먼츠 테스트 클라이언트 키
-      const clientKey = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
+      const clientKey = 'live_ck_5OWRapdA8dJOA1QZMXEAVo1zEqZK';
       const tossPayments = window.TossPayments(clientKey);
-      
-      // 주문 ID 생성 (고유해야 함)
+      const tp = tossPayments.payment({
+        customerKey: window.TossPayments.ANONYMOUS,
+      });
+
       const orderId = `LOCKIN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // 주문명 생성
-      const orderName = items.length === 1 
-        ? items[0].name 
+      const orderName = items.length === 1
+        ? items[0].name
         : `${items[0].name} 외 ${items.length - 1}건`;
-      
-      await tossPayments.requestPayment('카드', {
-        amount: grandTotal,
-        orderId: orderId,
-        orderName: orderName,
+
+      await tp.requestPayment({
+        method: 'CARD',
+        amount: { currency: 'KRW', value: grandTotal },
+        orderId,
+        orderName,
         customerName: shipping.name,
+        customerEmail: shipping.email || undefined,
+        customerMobilePhone: shipping.phone.replace(/-/g, '') || undefined,
         successUrl: `${window.location.origin}/checkout?success=true`,
         failUrl: `${window.location.origin}/checkout?fail=true`,
       });
     } catch (error) {
-      // 사용자가 결제창을 닫은 경우
       console.log('결제 취소:', error);
     }
-    
+
     setIsProcessing(false);
   };
 
