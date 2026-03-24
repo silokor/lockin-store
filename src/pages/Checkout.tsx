@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,12 +23,6 @@ declare global {
     };
     TossPayments: ((clientKey: string) => {
       payment: (options: { customerKey: string }) => {
-        requestPayment: (options: Record<string, any>) => Promise<void>;
-      };
-      widgets: (options: { customerKey: string }) => {
-        setAmount: (amount: { currency: string; value: number }) => Promise<void>;
-        renderPaymentMethods: (options: { selector: string; variantKey?: string }) => Promise<void>;
-        renderAgreement: (options: { selector: string; variantKey?: string }) => Promise<void>;
         requestPayment: (options: Record<string, any>) => Promise<void>;
       };
       ANONYMOUS: string;
@@ -586,52 +580,7 @@ export const Checkout = () => {
     cardName: ''
   });
 
-  const [widgetReady, setWidgetReady] = useState(false);
-  const widgetRef = useRef<any>(null);
-
-  // 결제위젯 초기화
-  useEffect(() => {
-    if (step === 'payment' && grandTotal > 0 && !widgetRef.current) {
-      const initWidget = async () => {
-        try {
-          const clientKey = 'live_ck_5OWRapdA8dJOA1QZMXEAVo1zEqZK';
-          const tossPayments = window.TossPayments(clientKey);
-          const widgets = tossPayments.widgets({
-            customerKey: window.TossPayments.ANONYMOUS,
-          });
-
-          await widgets.setAmount({ currency: 'KRW', value: grandTotal });
-          
-          await Promise.all([
-            widgets.renderPaymentMethods({ 
-              selector: '#payment-method',
-              variantKey: 'DEFAULT'
-            }),
-            widgets.renderAgreement({ 
-              selector: '#payment-agreement',
-              variantKey: 'AGREEMENT'
-            }),
-          ]);
-
-          widgetRef.current = widgets;
-          setWidgetReady(true);
-        } catch (error) {
-          console.error('결제위젯 초기화 실패:', error);
-        }
-      };
-
-      // DOM 렌더링 후 위젯 초기화
-      const timer = setTimeout(initWidget, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [step, grandTotal]);
-
-  // 금액 변경 시 위젯 업데이트
-  useEffect(() => {
-    if (widgetRef.current && grandTotal > 0) {
-      widgetRef.current.setAmount({ currency: 'KRW', value: grandTotal });
-    }
-  }, [grandTotal]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD');
 
   // 결제 성공 콜백 처리
   useEffect(() => {
@@ -726,11 +675,6 @@ export const Checkout = () => {
   };
 
   const handlePaymentSubmit = async () => {
-    if (!widgetRef.current) {
-      alert('결제 수단을 선택해주세요.');
-      return;
-    }
-
     setIsProcessing(true);
 
     // 배송/장바구니 정보를 sessionStorage에 저장 (결제 후 전송용)
@@ -738,12 +682,20 @@ export const Checkout = () => {
     sessionStorage.setItem('lockin_cart', JSON.stringify(items));
 
     try {
+      const clientKey = 'live_ck_5OWRapdA8dJOA1QZMXEAVo1zEqZK';
+      const tossPayments = window.TossPayments(clientKey);
+      const tp = tossPayments.payment({
+        customerKey: window.TossPayments.ANONYMOUS,
+      });
+
       const orderId = `LOCKIN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const orderName = items.length === 1
         ? items[0].name
         : `${items[0].name} 외 ${items.length - 1}건`;
 
-      await widgetRef.current.requestPayment({
+      await tp.requestPayment({
+        method: selectedPaymentMethod,
+        amount: { currency: 'KRW', value: grandTotal },
         orderId,
         orderName,
         customerName: shipping.name,
@@ -923,33 +875,52 @@ export const Checkout = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
               >
-                {/* 결제수단 선택 위젯 */}
-                <div 
-                  id="payment-method" 
-                  style={{ 
-                    marginBottom: 16,
-                    minHeight: widgetReady ? 'auto' : 200,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: widgetReady ? 'transparent' : 'rgba(0,0,0,0.02)',
-                    borderRadius: 8
-                  }}
-                >
-                  {!widgetReady && (
-                    <div style={{ 
-                      fontFamily: 'Space Mono', 
-                      fontSize: 11, 
-                      opacity: 0.4,
-                      letterSpacing: '0.1em'
-                    }}>
-                      결제수단 로딩 중...
-                    </div>
-                  )}
+                {/* 결제수단 선택 */}
+                <div style={{ marginBottom: 32 }}>
+                  <Label style={{ marginBottom: 16 }}>결제수단 선택</Label>
+                  <div style={{ display: 'grid', gap: 12 }}>
+                    {[
+                      { value: 'CARD', label: '신용/체크카드', icon: '💳' },
+                      { value: 'TOSSPAY', label: '토스페이', icon: '🔵' },
+                      { value: 'KAKAOPAY', label: '카카오페이', icon: '🟡' },
+                      { value: 'NAVERPAY', label: '네이버페이', icon: '🟢' },
+                    ].map((method) => (
+                      <label
+                        key={method.value}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 12,
+                          padding: '16px 20px',
+                          background: selectedPaymentMethod === method.value ? 'white' : 'rgba(255,255,255,0.5)',
+                          border: `1px solid ${selectedPaymentMethod === method.value ? 'var(--black)' : 'rgba(0,0,0,0.08)'}`,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value={method.value}
+                          checked={selectedPaymentMethod === method.value}
+                          onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                          style={{ display: 'none' }}
+                        />
+                        <span style={{ fontSize: 20 }}>{method.icon}</span>
+                        <span style={{ 
+                          fontFamily: 'Space Mono', 
+                          fontSize: 13,
+                          fontWeight: selectedPaymentMethod === method.value ? 700 : 400
+                        }}>
+                          {method.label}
+                        </span>
+                        {selectedPaymentMethod === method.value && (
+                          <span style={{ marginLeft: 'auto', fontSize: 14 }}>✓</span>
+                        )}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-
-                {/* 약관 동의 위젯 */}
-                <div id="payment-agreement" style={{ marginBottom: 24 }} />
 
                 <Divider />
 
@@ -964,11 +935,7 @@ export const Checkout = () => {
                     {shipping.address} {shipping.addressDetail}
                   </div>
                   <button
-                    onClick={() => {
-                      widgetRef.current = null;
-                      setWidgetReady(false);
-                      setStep('shipping');
-                    }}
+                    onClick={() => setStep('shipping')}
                     style={{
                       marginTop: 12,
                       background: 'none',
@@ -987,9 +954,9 @@ export const Checkout = () => {
 
                 <SubmitButton
                   onClick={handlePaymentSubmit}
-                  disabled={isProcessing || !widgetReady}
-                  whileHover={{ scale: (!isProcessing && widgetReady) ? 1.01 : 1 }}
-                  whileTap={{ scale: (!isProcessing && widgetReady) ? 0.99 : 1 }}
+                  disabled={isProcessing}
+                  whileHover={{ scale: !isProcessing ? 1.01 : 1 }}
+                  whileTap={{ scale: !isProcessing ? 0.99 : 1 }}
                 >
                   {isProcessing ? 'PROCESSING...' : `${formatPrice(grandTotal)} 결제하기`}
                 </SubmitButton>
