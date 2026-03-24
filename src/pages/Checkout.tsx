@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,6 +23,12 @@ declare global {
     };
     TossPayments: ((clientKey: string) => {
       payment: (options: { customerKey: string }) => {
+        requestPayment: (options: Record<string, any>) => Promise<void>;
+      };
+      widgets: (options: { customerKey: string }) => {
+        setAmount: (amount: { currency: string; value: number }) => Promise<void>;
+        renderPaymentMethods: (options: { selector: string; variantKey?: string }) => Promise<void>;
+        renderAgreement: (options: { selector: string; variantKey?: string }) => Promise<void>;
         requestPayment: (options: Record<string, any>) => Promise<void>;
       };
       ANONYMOUS: string;
@@ -580,6 +586,53 @@ export const Checkout = () => {
     cardName: ''
   });
 
+  const [widgetReady, setWidgetReady] = useState(false);
+  const widgetRef = useRef<any>(null);
+
+  // 결제위젯 초기화
+  useEffect(() => {
+    if (step === 'payment' && grandTotal > 0 && !widgetRef.current) {
+      const initWidget = async () => {
+        try {
+          const clientKey = 'live_ck_5OWRapdA8dJOA1QZMXEAVo1zEqZK';
+          const tossPayments = window.TossPayments(clientKey);
+          const widgets = tossPayments.widgets({
+            customerKey: window.TossPayments.ANONYMOUS,
+          });
+
+          await widgets.setAmount({ currency: 'KRW', value: grandTotal });
+          
+          await Promise.all([
+            widgets.renderPaymentMethods({ 
+              selector: '#payment-method',
+              variantKey: 'DEFAULT'
+            }),
+            widgets.renderAgreement({ 
+              selector: '#payment-agreement',
+              variantKey: 'AGREEMENT'
+            }),
+          ]);
+
+          widgetRef.current = widgets;
+          setWidgetReady(true);
+        } catch (error) {
+          console.error('결제위젯 초기화 실패:', error);
+        }
+      };
+
+      // DOM 렌더링 후 위젯 초기화
+      const timer = setTimeout(initWidget, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [step, grandTotal]);
+
+  // 금액 변경 시 위젯 업데이트
+  useEffect(() => {
+    if (widgetRef.current && grandTotal > 0) {
+      widgetRef.current.setAmount({ currency: 'KRW', value: grandTotal });
+    }
+  }, [grandTotal]);
+
   // 결제 성공 콜백 처리
   useEffect(() => {
     const success = searchParams.get('success');
@@ -673,6 +726,11 @@ export const Checkout = () => {
   };
 
   const handlePaymentSubmit = async () => {
+    if (!widgetRef.current) {
+      alert('결제 수단을 선택해주세요.');
+      return;
+    }
+
     setIsProcessing(true);
 
     // 배송/장바구니 정보를 sessionStorage에 저장 (결제 후 전송용)
@@ -680,20 +738,12 @@ export const Checkout = () => {
     sessionStorage.setItem('lockin_cart', JSON.stringify(items));
 
     try {
-      const clientKey = 'live_ck_5OWRapdA8dJOA1QZMXEAVo1zEqZK';
-      const tossPayments = window.TossPayments(clientKey);
-      const tp = tossPayments.payment({
-        customerKey: window.TossPayments.ANONYMOUS,
-      });
-
       const orderId = `LOCKIN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const orderName = items.length === 1
         ? items[0].name
         : `${items[0].name} 외 ${items.length - 1}건`;
 
-      await tp.requestPayment({
-        method: 'CARD',
-        amount: { currency: 'KRW', value: grandTotal },
+      await widgetRef.current.requestPayment({
         orderId,
         orderName,
         customerName: shipping.name,
@@ -873,31 +923,33 @@ export const Checkout = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
               >
-                <div style={{ 
-                  padding: '32px', 
-                  background: 'white', 
-                  border: '1px solid rgba(0,0,0,0.08)',
-                  marginBottom: 24,
-                  textAlign: 'center'
-                }}>
-                  <div style={{ 
-                    fontFamily: 'EB Garamond', 
-                    fontSize: 24, 
-                    fontStyle: 'italic',
-                    marginBottom: 12 
-                  }}>
-                    토스페이먼츠 결제
-                  </div>
-                  <div style={{ 
-                    fontFamily: 'Space Mono', 
-                    fontSize: 11, 
-                    opacity: 0.5,
-                    lineHeight: 1.8
-                  }}>
-                    아래 버튼을 클릭하면<br />
-                    토스페이먼츠 결제창이 열립니다
-                  </div>
+                {/* 결제수단 선택 위젯 */}
+                <div 
+                  id="payment-method" 
+                  style={{ 
+                    marginBottom: 16,
+                    minHeight: widgetReady ? 'auto' : 200,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: widgetReady ? 'transparent' : 'rgba(0,0,0,0.02)',
+                    borderRadius: 8
+                  }}
+                >
+                  {!widgetReady && (
+                    <div style={{ 
+                      fontFamily: 'Space Mono', 
+                      fontSize: 11, 
+                      opacity: 0.4,
+                      letterSpacing: '0.1em'
+                    }}>
+                      결제수단 로딩 중...
+                    </div>
+                  )}
                 </div>
+
+                {/* 약관 동의 위젯 */}
+                <div id="payment-agreement" style={{ marginBottom: 24 }} />
 
                 <Divider />
 
@@ -912,7 +964,11 @@ export const Checkout = () => {
                     {shipping.address} {shipping.addressDetail}
                   </div>
                   <button
-                    onClick={() => setStep('shipping')}
+                    onClick={() => {
+                      widgetRef.current = null;
+                      setWidgetReady(false);
+                      setStep('shipping');
+                    }}
                     style={{
                       marginTop: 12,
                       background: 'none',
@@ -931,11 +987,11 @@ export const Checkout = () => {
 
                 <SubmitButton
                   onClick={handlePaymentSubmit}
-                  disabled={isProcessing}
-                  whileHover={{ scale: !isProcessing ? 1.01 : 1 }}
-                  whileTap={{ scale: !isProcessing ? 0.99 : 1 }}
+                  disabled={isProcessing || !widgetReady}
+                  whileHover={{ scale: (!isProcessing && widgetReady) ? 1.01 : 1 }}
+                  whileTap={{ scale: (!isProcessing && widgetReady) ? 0.99 : 1 }}
                 >
-                  {isProcessing ? 'PROCESSING...' : `토스로 ${formatPrice(grandTotal)} 결제하기`}
+                  {isProcessing ? 'PROCESSING...' : `${formatPrice(grandTotal)} 결제하기`}
                 </SubmitButton>
               </motion.div>
             )}
