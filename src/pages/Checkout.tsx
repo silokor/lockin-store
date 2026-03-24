@@ -463,6 +463,43 @@ const ShopLink = styled(Link)`
   }
 `;
 
+// 결제 처리 중 오버레이
+const ProcessingOverlay = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  gap: 32px;
+`;
+
+const Spinner = styled(motion.div)`
+  width: 48px;
+  height: 48px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: rgba(255,255,255,0.8);
+  border-radius: 50%;
+`;
+
+const ProcessingText = styled(motion.div)`
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.8);
+  text-transform: uppercase;
+`;
+
+const ProcessingSubText = styled(motion.div)`
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: rgba(255,255,255,0.4);
+  margin-top: -16px;
+`;
+
 // 성공 모달
 const SuccessOverlay = styled(motion.div)`
   position: fixed;
@@ -955,6 +992,32 @@ export const Checkout = () => {
       </Container>
 
       <AnimatePresence>
+        {isProcessing && (
+          <ProcessingOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <Spinner
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            />
+            <ProcessingText
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              Processing Payment
+            </ProcessingText>
+            <ProcessingSubText
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              잠시만 기다려주세요...
+            </ProcessingSubText>
+          </ProcessingOverlay>
+        )}
         {showSuccess && (
           <SuccessOverlay
             initial={{ opacity: 0 }}
