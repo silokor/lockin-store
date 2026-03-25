@@ -590,6 +590,7 @@ export const Checkout = () => {
     const amount = searchParams.get('amount');
 
     if (success === 'true' && paymentKey && orderId && amount) {
+      setIsProcessing(true);
       // 서버에 결제 승인 요청
       fetch(`${API_URL}/api/payment/confirm`, {
         method: 'POST',
@@ -600,10 +601,14 @@ export const Checkout = () => {
           amount: Number(amount),
         }),
       })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
         .then(data => {
           setOrderResult(data);
           setShowSuccess(true);
+          setIsProcessing(false);
 
           // 배송 정보 전송
           const savedShipping = sessionStorage.getItem('lockin_shipping');
@@ -621,7 +626,9 @@ export const Checkout = () => {
         })
         .catch(err => {
           console.error('결제 승인 실패:', err);
+          setIsProcessing(false);
           alert('결제 승인 중 오류가 발생했습니다. 고객센터에 문의해주세요.');
+          navigate('/checkout', { replace: true });
         });
     }
 
@@ -711,7 +718,7 @@ export const Checkout = () => {
     setIsProcessing(false);
   };
 
-  if (items.length === 0 && !showSuccess) {
+  if (items.length === 0 && !showSuccess && !isProcessing && !searchParams.get('success')) {
     return (
       <Page>
         <Global styles={globalStyles} />
